@@ -1,0 +1,123 @@
+<div class="a11y-overlay" (click)="close.emit()" role="dialog" aria-modal="true" aria-label="Accessibility settings">
+  <div class="a11y-panel" (click)="$event.stopPropagation()">
+    <div class="panel-header">
+      <div class="panel-title">
+        <i class="ti ti-accessible" aria-hidden="true"></i>
+        Accessibility
+      </div>
+      <button class="close-btn" (click)="close.emit()" aria-label="Close accessibility panel">
+        <i class="ti ti-x"></i>
+      </button>
+    </div>
+
+    <div class="settings-list">
+      <!-- Dark Mode -->
+      <div class="setting-row">
+        <div class="setting-info">
+          <i class="ti ti-moon" aria-hidden="true"></i>
+          <span>Dark Mode</span>
+        </div>
+        <button
+          class="toggle-switch"
+          [class.on]="theme.settings().darkMode"
+          (click)="theme.toggleDarkMode()"
+          [attr.aria-checked]="theme.settings().darkMode"
+          role="switch"
+          aria-label="Toggle dark mode">
+        </button>
+      </div>
+
+      <!-- Text to Speech -->
+      <div class="setting-row">
+        <div class="setting-info">
+          <i class="ti ti-volume" aria-hidden="true"></i>
+          <span>Text to Speech</span>
+        </div>
+        <button
+          class="toggle-switch"
+          [class.on]="theme.settings().textToSpeech"
+          (click)="theme.toggleTTS()"
+          [attr.aria-checked]="theme.settings().textToSpeech"
+          role="switch"
+          aria-label="Toggle text to speech">
+        </button>
+      </div>
+
+      <!-- Dyslexia Mode -->
+      <div class="setting-row">
+        <div class="setting-info">
+          <i class="ti ti-letter-case" aria-hidden="true"></i>
+          <span>Dyslexia Font</span>
+        </div>
+        <button
+          class="toggle-switch"
+          [class.on]="theme.settings().dyslexiaMode"
+          (click)="theme.toggleDyslexia()"
+          [attr.aria-checked]="theme.settings().dyslexiaMode"
+          role="switch"
+          aria-label="Toggle dyslexia-friendly font">
+        </button>
+      </div>
+
+      <!-- High Contrast -->
+      <div class="setting-row">
+        <div class="setting-info">
+          <i class="ti ti-contrast" aria-hidden="true"></i>
+          <span>High Contrast</span>
+        </div>
+        <button
+          class="toggle-switch"
+          [class.on]="theme.settings().highContrast"
+          (click)="theme.toggleHighContrast()"
+          [attr.aria-checked]="theme.settings().highContrast"
+          role="switch"
+          aria-label="Toggle high contrast mode">
+        </button>
+      </div>
+
+      <!-- Reduced Motion -->
+      <div class="setting-row">
+        <div class="setting-info">
+          <i class="ti ti-player-pause" aria-hidden="true"></i>
+          <span>Reduce Motion</span>
+        </div>
+        <button
+          class="toggle-switch"
+          [class.on]="theme.settings().reducedMotion"
+          (click)="theme.toggleReducedMotion()"
+          [attr.aria-checked]="theme.settings().reducedMotion"
+          role="switch"
+          aria-label="Toggle reduced motion">
+        </button>
+      </div>
+
+      <!-- Font Size -->
+      <div class="font-size-section">
+        <div class="setting-info">
+          <i class="ti ti-text-size" aria-hidden="true"></i>
+          <span>Font Size</span>
+        </div>
+        <div class="font-btns" role="group" aria-label="Font size options">
+          @for (size of fontSizes; track size) {
+            <button
+              class="font-btn"
+              [class.active]="theme.settings().fontSize === size"
+              (click)="theme.setFontSize(size)"
+              [attr.aria-pressed]="theme.settings().fontSize === size"
+              [attr.aria-label]="size + 'px font size'">
+              {{ size }}
+            </button>
+          }
+        </div>
+      </div>
+
+      <!-- TTS Test -->
+      @if (theme.settings().textToSpeech) {
+        <button class="tts-btn" (click)="speak('Welcome to StudyBuddy. Text to speech is enabled.')">
+          <i class="ti ti-player-play" aria-hidden="true"></i>
+          Test Voice
+        </button>
+      }
+    </div>
+  </div>
+</div>

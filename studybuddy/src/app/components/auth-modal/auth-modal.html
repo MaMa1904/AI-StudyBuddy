@@ -1,0 +1,222 @@
+<div class="modal-overlay" (click)="close.emit()" role="dialog" aria-modal="true" [attr.aria-label]="tab() === 'login' ? 'Sign in' : 'Create account'">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+
+    <!-- Header -->
+    <div class="modal-header">
+      <div class="modal-logo">
+        <div class="logo-icon" aria-hidden="true"><i class="ti ti-planet"></i></div>
+        <span class="grad-text">StudyBuddy</span>
+      </div>
+      <button class="close-btn" (click)="close.emit()" aria-label="Close">
+        <i class="ti ti-x"></i>
+      </button>
+    </div>
+
+    <!-- Tabs -->
+    <div class="auth-tabs" role="tablist">
+      <button
+        class="auth-tab"
+        [class.active]="tab() === 'login'"
+        (click)="setTab('login')"
+        role="tab"
+        [attr.aria-selected]="tab() === 'login'"
+        id="tab-login"
+        aria-controls="panel-login">
+        Sign In
+      </button>
+      <button
+        class="auth-tab"
+        [class.active]="tab() === 'register'"
+        (click)="setTab('register')"
+        role="tab"
+        [attr.aria-selected]="tab() === 'register'"
+        id="tab-register"
+        aria-controls="panel-register">
+        Create Account
+      </button>
+    </div>
+
+    <!-- Error / Success -->
+    @if (error()) {
+      <div class="alert alert-error" role="alert" aria-live="assertive">
+        <i class="ti ti-alert-circle" aria-hidden="true"></i>
+        {{ error() }}
+      </div>
+    }
+
+    <!-- ── LOGIN ── -->
+    @if (tab() === 'login') {
+      <form
+        class="auth-form"
+        (ngSubmit)="onLogin()"
+        id="panel-login"
+        role="tabpanel"
+        aria-labelledby="tab-login"
+        #loginForm="ngForm">
+
+        <div class="form-group">
+          <label for="login-email">Email address</label>
+          <div class="input-wrap">
+            <i class="ti ti-mail" aria-hidden="true"></i>
+            <input
+              id="login-email"
+              type="email"
+              [(ngModel)]="loginEmail"
+              name="loginEmail"
+              placeholder="you@example.com"
+              autocomplete="email"
+              required
+              [disabled]="loading()">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="login-password">Password</label>
+          <div class="input-wrap">
+            <i class="ti ti-lock" aria-hidden="true"></i>
+            <input
+              id="login-password"
+              [type]="showPassword() ? 'text' : 'password'"
+              [(ngModel)]="loginPassword"
+              name="loginPassword"
+              placeholder="Your password"
+              autocomplete="current-password"
+              required
+              [disabled]="loading()">
+            <button
+              type="button"
+              class="eye-btn"
+              (click)="showPassword.update(v => !v)"
+              [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'">
+              <i class="ti" [class.ti-eye]="!showPassword()" [class.ti-eye-off]="showPassword()"></i>
+            </button>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-primary submit-btn" [disabled]="loading()">
+          @if (loading()) {
+            <span class="loading-dots"><span></span><span></span><span></span></span>
+            Signing in…
+          } @else {
+            <i class="ti ti-login" aria-hidden="true"></i>
+            Sign In
+          }
+        </button>
+
+        <p class="switch-text">
+          Don't have an account?
+          <button type="button" class="link-btn" (click)="setTab('register')">Create one free</button>
+        </p>
+      </form>
+    }
+
+    <!-- ── REGISTER ── -->
+    @if (tab() === 'register') {
+      <form
+        class="auth-form"
+        (ngSubmit)="onRegister()"
+        id="panel-register"
+        role="tabpanel"
+        aria-labelledby="tab-register"
+        #regForm="ngForm">
+
+        <div class="form-group">
+          <label for="reg-name">Full name</label>
+          <div class="input-wrap">
+            <i class="ti ti-user" aria-hidden="true"></i>
+            <input
+              id="reg-name"
+              type="text"
+              [(ngModel)]="regName"
+              name="regName"
+              placeholder="Your full name"
+              autocomplete="name"
+              required
+              [disabled]="loading()">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="reg-email">Email address</label>
+          <div class="input-wrap">
+            <i class="ti ti-mail" aria-hidden="true"></i>
+            <input
+              id="reg-email"
+              type="email"
+              [(ngModel)]="regEmail"
+              name="regEmail"
+              placeholder="you@example.com"
+              autocomplete="email"
+              required
+              [disabled]="loading()">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="reg-password">Password</label>
+          <div class="input-wrap">
+            <i class="ti ti-lock" aria-hidden="true"></i>
+            <input
+              id="reg-password"
+              [type]="showPassword() ? 'text' : 'password'"
+              [(ngModel)]="regPassword"
+              name="regPassword"
+              placeholder="At least 6 characters"
+              autocomplete="new-password"
+              required
+              [disabled]="loading()">
+            <button
+              type="button"
+              class="eye-btn"
+              (click)="showPassword.update(v => !v)"
+              [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'">
+              <i class="ti" [class.ti-eye]="!showPassword()" [class.ti-eye-off]="showPassword()"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="reg-confirm">Confirm password</label>
+          <div class="input-wrap">
+            <i class="ti ti-lock-check" aria-hidden="true"></i>
+            <input
+              id="reg-confirm"
+              [type]="showPassword() ? 'text' : 'password'"
+              [(ngModel)]="regConfirm"
+              name="regConfirm"
+              placeholder="Repeat your password"
+              autocomplete="new-password"
+              required
+              [disabled]="loading()">
+          </div>
+        </div>
+
+        <button type="submit" class="btn-primary submit-btn" [disabled]="loading()">
+          @if (loading()) {
+            <span class="loading-dots"><span></span><span></span><span></span></span>
+            Creating account…
+          } @else {
+            <i class="ti ti-user-plus" aria-hidden="true"></i>
+            Create Account
+          }
+        </button>
+
+        <p class="switch-text">
+          Already have an account?
+          <button type="button" class="link-btn" (click)="setTab('login')">Sign in</button>
+        </p>
+      </form>
+    }
+
+    <!-- Guest option -->
+    <div class="guest-divider">
+      <span>or</span>
+    </div>
+    <button class="guest-btn" (click)="close.emit()">
+      <i class="ti ti-ghost" aria-hidden="true"></i>
+      Continue as Guest
+      <span class="guest-note">(data won't be saved across sessions)</span>
+    </button>
+
+  </div>
+</div>

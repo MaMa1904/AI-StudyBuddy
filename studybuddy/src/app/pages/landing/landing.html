@@ -1,0 +1,183 @@
+<div class="landing-wrap">
+
+  <!-- Hero -->
+  <section class="hero" aria-labelledby="hero-heading">
+    <div class="hero-badge">
+      <i class="ti ti-sparkles" aria-hidden="true"></i>
+      AI-Powered Learning
+    </div>
+    <h1 id="hero-heading">
+      Turn any PDF into<br>
+      your <span class="grad-text">personal tutor</span>
+    </h1>
+    <p>Upload a PDF and instantly get AI-generated summaries, flashcards, and quizzes. Study smarter — not harder.</p>
+
+    <div class="hero-btns">
+      @if (auth.isLoggedIn()) {
+        <a class="btn-primary" routerLink="/workspace">
+          <i class="ti ti-upload" aria-hidden="true"></i>
+          Upload a PDF
+        </a>
+        <a class="btn-secondary" routerLink="/dashboard">
+          <i class="ti ti-layout-dashboard" aria-hidden="true"></i>
+          Go to Dashboard
+        </a>
+      } @else {
+        <button class="btn-primary" (click)="showAuthModal.set(true)">
+          <i class="ti ti-rocket" aria-hidden="true"></i>
+          Get Started Free
+        </button>
+        <a class="btn-secondary" routerLink="/workspace">
+          <i class="ti ti-player-play" aria-hidden="true"></i>
+          Try Without Account
+        </a>
+      }
+    </div>
+  </section>
+
+  <!-- Upload Zone -->
+  <section class="upload-section" aria-labelledby="upload-heading">
+    <h2 id="upload-heading" class="sr-only">Upload your PDF</h2>
+    <div
+      class="upload-zone"
+      [class.drag]="isDragging()"
+      (dragover)="onDragOver($event)"
+      (dragleave)="onDragLeave()"
+      (drop)="onDrop($event)"
+      (click)="fileInput.click()"
+      role="button"
+      tabindex="0"
+      aria-label="Upload PDF files — drag and drop or click to browse"
+      (keydown.enter)="fileInput.click()"
+      (keydown.space)="fileInput.click()">
+      <input
+        #fileInput
+        type="file"
+        accept=".pdf"
+        multiple
+        (change)="onFileSelect($event)"
+        style="display:none"
+        aria-hidden="true">
+      <div class="upload-icon" aria-hidden="true">
+        <i class="ti ti-cloud-upload"></i>
+      </div>
+      <h3>Drop your PDFs here</h3>
+      <p>or click to browse — supports scanned PDFs with OCR</p>
+      <div class="upload-tags">
+        <span class="keyword-tag"><i class="ti ti-file-type-pdf" aria-hidden="true"></i> PDF</span>
+        <span class="keyword-tag"><i class="ti ti-eye" aria-hidden="true"></i> OCR</span>
+        <span class="keyword-tag"><i class="ti ti-files" aria-hidden="true"></i> Multi-file</span>
+        <span class="keyword-tag"><i class="ti ti-lock" aria-hidden="true"></i> Secure</span>
+      </div>
+    </div>
+
+    @if (uploadedFiles().length > 0) {
+      <div class="upload-list" role="list" aria-label="Uploaded files">
+        @for (file of uploadedFiles(); track file.id) {
+          <div class="upload-item" role="listitem">
+            <div class="upload-item-icon" aria-hidden="true">
+              <i class="ti ti-file-type-pdf"></i>
+            </div>
+            <div class="upload-item-info">
+              <div class="upload-item-name">{{ file.name }}</div>
+              <div class="upload-item-meta">{{ formatSize(file.size) }}</div>
+              @if (file.status === 'processing') {
+                <div class="prog-bar" style="margin-top:6px">
+                  <div class="prog-fill" [style.width.%]="file.progress"></div>
+                </div>
+              }
+            </div>
+            <span class="badge" [class.badge-green]="file.status === 'ready'" [class.badge-yellow]="file.status === 'processing'">
+              @if (file.status === 'processing') { {{ file.progress }}% } @else { <i class="ti ti-check"></i> Ready }
+            </span>
+          </div>
+        }
+        @if (uploadedFiles().some(f => f.status === 'ready')) {
+          <a class="btn-primary" routerLink="/workspace" style="margin-top:8px;justify-content:center">
+            <i class="ti ti-arrow-right" aria-hidden="true"></i>
+            Open in Workspace
+          </a>
+        }
+      </div>
+    }
+  </section>
+
+  <!-- How it works -->
+  <section class="steps-section" aria-labelledby="steps-heading">
+    <div class="section-title">
+      <h2 id="steps-heading">How it <span class="grad-text">works</span></h2>
+      <p>From PDF to exam-ready in minutes</p>
+    </div>
+    <div class="steps-grid" role="list">
+      @for (step of steps; track step.num) {
+        <div class="step-card" role="listitem">
+          <div class="step-num" aria-hidden="true">{{ step.num }}</div>
+          <div class="step-icon" aria-hidden="true">
+            <i class="ti {{ step.icon }}"></i>
+          </div>
+          <h3>{{ step.title }}</h3>
+          <p>{{ step.desc }}</p>
+        </div>
+      }
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="features-section" aria-labelledby="features-heading">
+    <div class="section-title">
+      <h2 id="features-heading">Everything you need to <span class="grad-text">ace your exams</span></h2>
+      <p>AI-powered tools designed for how students actually learn</p>
+    </div>
+    <div class="feat-grid" role="list">
+      @for (feat of features; track feat.title) {
+        <div class="feat-card" role="listitem">
+          <div class="feat-icon feat-icon--{{ feat.color }}" aria-hidden="true">
+            <i class="ti {{ feat.icon }}"></i>
+          </div>
+          <h3>{{ feat.title }}</h3>
+          <p>{{ feat.desc }}</p>
+        </div>
+      }
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-section" aria-labelledby="cta-heading">
+    <div class="cta-card">
+      <h2 id="cta-heading">Ready to study smarter?</h2>
+      <p>Create a free account to save your progress, build streaks, and access your study history from anywhere.</p>
+      <div class="cta-btns">
+        @if (!auth.isLoggedIn()) {
+          <button class="btn-primary" (click)="showAuthModal.set(true)">
+            <i class="ti ti-user-plus" aria-hidden="true"></i>
+            Create Free Account
+          </button>
+          <a class="btn-secondary" routerLink="/workspace">
+            <i class="ti ti-ghost" aria-hidden="true"></i>
+            Continue as Guest
+          </a>
+        } @else {
+          <a class="btn-primary" routerLink="/workspace">
+            <i class="ti ti-upload" aria-hidden="true"></i>
+            Upload a PDF
+          </a>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer" role="contentinfo">
+    <div class="footer-logo">
+      <div class="logo-icon" aria-hidden="true"><i class="ti ti-planet"></i></div>
+      <span class="grad-text" style="font-weight:700">StudyBuddy</span>
+    </div>
+    <p class="footer-copy">Built for students. Your data stays on your device.</p>
+  </footer>
+
+</div>
+
+<!-- Auth Modal -->
+@if (showAuthModal()) {
+  <app-auth-modal (close)="showAuthModal.set(false)" />
+}

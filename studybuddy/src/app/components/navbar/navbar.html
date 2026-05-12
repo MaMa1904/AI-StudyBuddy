@@ -1,0 +1,126 @@
+<nav class="nav" role="navigation" aria-label="Main navigation">
+
+  <!-- Logo -->
+  <a class="logo" routerLink="/" aria-label="StudyBuddy Home">
+    <div class="logo-icon" aria-hidden="true"><i class="ti ti-planet"></i></div>
+    <span class="logo-text">StudyBuddy</span>
+  </a>
+
+  <!-- Desktop Nav Tabs -->
+  <div class="nav-tabs" role="tablist" aria-label="Navigation tabs">
+    @for (link of navLinks; track link.path) {
+      <a
+        class="nav-tab"
+        [routerLink]="link.path"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: link.path === '/' }"
+        role="tab"
+        [attr.aria-label]="link.label">
+        <i class="ti {{ link.icon }}" aria-hidden="true"></i>
+        <span>{{ link.label }}</span>
+      </a>
+    }
+  </div>
+
+  <!-- Right Controls -->
+  <div class="nav-right">
+
+    <!-- Theme toggle -->
+    <button
+      class="nav-btn"
+      (click)="theme.toggleDarkMode()"
+      [attr.aria-label]="theme.settings().darkMode ? 'Switch to light mode' : 'Switch to dark mode'"
+      title="Toggle theme">
+      <i class="ti" [class.ti-sun]="theme.settings().darkMode" [class.ti-moon]="!theme.settings().darkMode"></i>
+    </button>
+
+    <!-- Accessibility -->
+    <button class="nav-btn" (click)="toggleA11y()" aria-label="Accessibility settings" title="Accessibility">
+      <i class="ti ti-accessible"></i>
+    </button>
+
+    <!-- Auth: Guest → show Sign In button -->
+    @if (!auth.isLoggedIn()) {
+      <button class="sign-in-btn" (click)="openAuth()" aria-label="Sign in or create account">
+        <i class="ti ti-login" aria-hidden="true"></i>
+        Sign In
+      </button>
+    }
+
+    <!-- Auth: Logged in → show avatar + dropdown -->
+    @if (auth.isLoggedIn()) {
+      <div class="user-menu-wrap">
+        <button
+          class="nav-avatar"
+          (click)="toggleUserMenu()"
+          [attr.aria-label]="'User menu for ' + auth.currentUser()?.name"
+          [attr.aria-expanded]="showUserMenu()"
+          title="{{ auth.currentUser()?.name }}">
+          {{ auth.currentUser()?.avatar }}
+        </button>
+
+        @if (showUserMenu()) {
+          <div class="user-dropdown" role="menu" aria-label="User menu">
+            <div class="user-info">
+              <div class="user-name">{{ auth.currentUser()?.name }}</div>
+              <div class="user-email">{{ auth.currentUser()?.email }}</div>
+            </div>
+            <div class="dropdown-divider" role="separator"></div>
+            <button class="dropdown-item" role="menuitem" routerLink="/dashboard" (click)="showUserMenu.set(false)">
+              <i class="ti ti-layout-dashboard" aria-hidden="true"></i> Dashboard
+            </button>
+            <button class="dropdown-item" role="menuitem" routerLink="/profile" (click)="showUserMenu.set(false)">
+              <i class="ti ti-user" aria-hidden="true"></i> Profile
+            </button>
+            <button class="dropdown-item dropdown-item--danger" role="menuitem" (click)="logout()">
+              <i class="ti ti-logout" aria-hidden="true"></i> Sign Out
+            </button>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- Mobile hamburger -->
+    <button class="hamburger" (click)="toggleMobile()" aria-label="Toggle mobile menu">
+      <i class="ti" [class.ti-menu-2]="!mobileMenuOpen()" [class.ti-x]="mobileMenuOpen()"></i>
+    </button>
+  </div>
+
+  <!-- Mobile Menu -->
+  @if (mobileMenuOpen()) {
+    <div class="mobile-menu" role="menu">
+      @for (link of navLinks; track link.path) {
+        <a
+          class="mobile-link"
+          [routerLink]="link.path"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: link.path === '/' }"
+          (click)="closeMobile()"
+          role="menuitem">
+          <i class="ti {{ link.icon }}" aria-hidden="true"></i>
+          {{ link.label }}
+        </a>
+      }
+      <div class="mobile-divider" role="separator"></div>
+      @if (!auth.isLoggedIn()) {
+        <button class="mobile-link" (click)="openAuth(); closeMobile()" role="menuitem">
+          <i class="ti ti-login" aria-hidden="true"></i> Sign In
+        </button>
+      } @else {
+        <button class="mobile-link mobile-link--danger" (click)="logout(); closeMobile()" role="menuitem">
+          <i class="ti ti-logout" aria-hidden="true"></i> Sign Out
+        </button>
+      }
+    </div>
+  }
+</nav>
+
+<!-- Accessibility Panel -->
+@if (showA11y()) {
+  <app-accessibility-panel (close)="toggleA11y()" />
+}
+
+<!-- Auth Modal -->
+@if (showAuthModal()) {
+  <app-auth-modal (close)="closeAuth()" />
+}

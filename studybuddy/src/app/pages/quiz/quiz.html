@@ -1,0 +1,241 @@
+<div class="quiz-page" role="main">
+
+  <!-- ── SETUP ── -->
+  @if (state() === 'setup') {
+    <div class="quiz-setup animate-fade-up">
+      <h1>AI Quiz Generator</h1>
+      <p>Test your knowledge from your uploaded documents.</p>
+
+      <!-- No questions empty state -->
+      @if (!hasQuestions()) {
+        <div class="quiz-empty">
+          <div class="quiz-empty-icon" aria-hidden="true"><i class="ti ti-help-circle"></i></div>
+          <h2>No quiz questions yet</h2>
+          <p>Upload a PDF in the Workspace and use the AI Tools to generate quiz questions from your documents.</p>
+          <div class="quiz-empty-actions">
+            <a class="btn-primary" routerLink="/workspace">
+              <i class="ti ti-upload" aria-hidden="true"></i>
+              Go to Workspace
+            </a>
+            @if (!auth.isLoggedIn()) {
+              <button class="btn-secondary" (click)="showAuthModal.set(true)">
+                <i class="ti ti-login" aria-hidden="true"></i>
+                Sign In
+              </button>
+            }
+          </div>
+        </div>
+
+      } @else {
+        <div class="setup-grid">
+          <div class="setup-section">
+            <div class="setup-label">Question Types</div>
+            <div class="type-list">
+              @for (type of questionTypes; track type.label) {
+                <label class="type-option">
+                  <input type="checkbox" [(ngModel)]="type.checked" [attr.aria-label]="type.label">
+                  {{ type.label }}
+                </label>
+              }
+            </div>
+          </div>
+
+          <div class="setup-section">
+            <div class="setup-label">Difficulty</div>
+            <div class="diff-btns" role="group" aria-label="Select difficulty">
+              @for (d of difficulties; track d) {
+                <button class="diff-btn" [class.active]="activeDifficulty() === d" (click)="activeDifficulty.set(d)" [attr.aria-pressed]="activeDifficulty() === d">
+                  {{ d }}
+                </button>
+              }
+            </div>
+          </div>
+
+          <div class="setup-section">
+            <div class="setup-label">Settings</div>
+            <div class="settings-list">
+              <label class="type-option">
+                <input type="checkbox" [(ngModel)]="enableTimerChecked" (change)="enableTimer.set(enableTimerChecked)" aria-label="Enable timer">
+                Enable Timer (5 min)
+              </label>
+              <label class="type-option">
+                <input type="checkbox" [(ngModel)]="shuffleQuestionsChecked" (change)="shuffleQuestions.set(shuffleQuestionsChecked)" aria-label="Shuffle questions">
+                Shuffle Questions
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="setup-info">
+          <i class="ti ti-info-circle" aria-hidden="true"></i>
+          {{ questions().length }} questions available
+        </div>
+
+        <button class="btn-primary" (click)="startQuiz()" style="width:100%;justify-content:center;padding:14px" [disabled]="questions().length === 0">
+          <i class="ti ti-player-play" aria-hidden="true"></i>
+          Start Quiz
+        </button>
+      }
+
+      <!-- Recent attempts -->
+      @if (recentAttempts().length > 0) {
+        <div class="recent-attempts">
+          <div class="setup-label" style="margin-bottom:10px">Recent Attempts</div>
+          @for (attempt of recentAttempts(); track attempt.id) {
+            <div class="attempt-row">
+              <div class="attempt-info">
+                <div class="attempt-doc">{{ attempt.docName }}</div>
+                <div class="attempt-meta">{{ data.timeAgo(attempt.date) }} · {{ attempt.totalQuestions }} questions</div>
+              </div>
+              <div class="attempt-score" [class.score-good]="attempt.score >= 70" [class.score-bad]="attempt.score < 50">
+                {{ attempt.score }}%
+              </div>
+            </div>
+          }
+        </div>
+      }
+
+      @if (!auth.isLoggedIn()) {
+        <div class="quiz-signin-note">
+          <i class="ti ti-info-circle" aria-hidden="true"></i>
+          <span>Sign in to save your quiz history and track progress over time.</span>
+          <button class="link-btn" (click)="showAuthModal.set(true)">Sign in</button>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- ── ACTIVE QUIZ ── -->
+  @if (state() === 'active') {
+    <div class="quiz-active animate-fade-in">
+      <div class="quiz-header">
+        <div class="quiz-timer" [class.urgent]="timeLeft() < 60" role="timer" aria-live="polite" [attr.aria-label]="'Time remaining: ' + timerDisplay()">
+          <i class="ti ti-clock" aria-hidden="true"></i>
+          {{ timerDisplay() }}
+        </div>
+        <div class="quiz-prog" role="progressbar" [attr.aria-valuenow]="progress()" aria-valuemin="0" aria-valuemax="100">
+          <div class="quiz-prog-bar">
+            <div class="quiz-prog-fill" [style.width.%]="progress()"></div>
+          </div>
+          <div class="quiz-prog-label">{{ currentIndex() + 1 }} / {{ questions().length }}</div>
+        </div>
+        <button class="btn-secondary btn-sm" (click)="finishQuiz()">
+          <i class="ti ti-x" aria-hidden="true"></i> End Quiz
+        </button>
+      </div>
+
+      @if (currentQuestion(); as q) {
+        <div class="question-card animate-fade-up">
+          <div class="q-num">Question {{ currentIndex() + 1 }} · {{ q.type === 'mcq' ? 'Multiple Choice' : q.type === 'true-false' ? 'True / False' : 'Short Answer' }}</div>
+          <div class="q-text">{{ q.text }}</div>
+
+          <div class="options" role="radiogroup" [attr.aria-label]="'Answer options'">
+            @for (option of q.options; track $index) {
+              <button
+                class="option"
+                [class]="optionClass(q, $index)"
+                (click)="selectAnswer($index)"
+                [disabled]="showFeedback()"
+                role="radio"
+                [attr.aria-checked]="selectedAnswer() === $index">
+                <span class="option-letter" aria-hidden="true">{{ optionLetter($index) }}</span>
+                {{ option }}
+              </button>
+            }
+          </div>
+
+          @if (showFeedback()) {
+            <div class="feedback-bar" [class.feedback-correct]="isCorrect(q, selectedAnswer())" [class.feedback-wrong]="!isCorrect(q, selectedAnswer())" role="alert" aria-live="assertive">
+              <i class="ti" [class.ti-check]="isCorrect(q, selectedAnswer())" [class.ti-x]="!isCorrect(q, selectedAnswer())" aria-hidden="true"></i>
+              @if (isCorrect(q, selectedAnswer())) { Correct! {{ q.explanation }} }
+              @else { Incorrect. {{ q.explanation }} }
+            </div>
+            <button class="btn-primary" style="margin-top:14px;width:100%;justify-content:center" (click)="nextQuestion()">
+              @if (currentIndex() < questions().length - 1) {
+                Next Question <i class="ti ti-arrow-right" aria-hidden="true"></i>
+              } @else {
+                Finish Quiz <i class="ti ti-flag" aria-hidden="true"></i>
+              }
+            </button>
+          }
+        </div>
+      }
+    </div>
+  }
+
+  <!-- ── RESULTS ── -->
+  @if (state() === 'result' && result(); as r) {
+    <div class="quiz-result animate-fade-up">
+      <div class="score-card">
+        <div class="score-circle" role="img" [attr.aria-label]="'Score: ' + r.score + ' percent'">
+          <div class="score-num">{{ r.score }}</div>
+          <div class="score-pct">%</div>
+        </div>
+        <h2>{{ scoreGrade(r.score) }}</h2>
+        <p>Completed in {{ Math.floor(r.timeTaken / 60) }}m {{ r.timeTaken % 60 }}s</p>
+
+        <div class="score-stats" role="list">
+          <div class="score-stat" role="listitem">
+            <div class="score-stat-val" style="color:var(--green)">{{ r.correct }}</div>
+            <div class="score-stat-lbl">Correct</div>
+          </div>
+          <div class="score-stat" role="listitem">
+            <div class="score-stat-val" style="color:var(--red)">{{ r.wrong }}</div>
+            <div class="score-stat-lbl">Wrong</div>
+          </div>
+          <div class="score-stat" role="listitem">
+            <div class="score-stat-val" style="color:var(--text3)">{{ r.skipped }}</div>
+            <div class="score-stat-lbl">Skipped</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- All-time history -->
+      @if (recentAttempts().length > 1) {
+        <div class="leaderboard-card">
+          <div class="lb-header">
+            <i class="ti ti-history" style="color:var(--indigo-light)" aria-hidden="true"></i>
+            <span>Your Quiz History</span>
+          </div>
+          <div class="lb-entries" role="list">
+            @for (attempt of recentAttempts(); track attempt.id) {
+              <div class="lb-entry" [class.you]="$index === 0" role="listitem">
+                <span class="lb-rank-num">{{ $index + 1 }}</span>
+                <span class="lb-name">{{ attempt.docName }}</span>
+                <span class="lb-meta">{{ data.timeAgo(attempt.date) }}</span>
+                <span class="lb-score">{{ attempt.score }}%</span>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      @if (!auth.isLoggedIn()) {
+        <div class="quiz-signin-note">
+          <i class="ti ti-info-circle" aria-hidden="true"></i>
+          <span>This result won't be saved. <button class="link-btn" (click)="showAuthModal.set(true)">Sign in</button> to track your progress.</span>
+        </div>
+      }
+
+      <div class="result-actions">
+        <button class="btn-secondary" (click)="retryQuiz()" style="flex:1;justify-content:center">
+          <i class="ti ti-refresh" aria-hidden="true"></i> Retry
+        </button>
+        <button class="btn-secondary" (click)="downloadQuiz()" style="flex:1;justify-content:center">
+          <i class="ti ti-download" aria-hidden="true"></i> Download
+        </button>
+        <a class="btn-primary" routerLink="/flashcards" style="flex:1;justify-content:center">
+          <i class="ti ti-cards" aria-hidden="true"></i> Flashcards
+        </a>
+        <a class="btn-secondary" routerLink="/dashboard" style="flex:1;justify-content:center">
+          <i class="ti ti-layout-dashboard" aria-hidden="true"></i> Dashboard
+        </a>
+      </div>
+    </div>
+  }
+
+</div>
+
+@if (showAuthModal()) {
+  <app-auth-modal (close)="showAuthModal.set(false)" />
+}

@@ -1,0 +1,36 @@
+# ── Dependencies ──
+node_modules/
+.angular/
+
+# ── Build output ──
+dist/
+*.js.map
+
+# ── Environment / Secrets ──
+.env
+.env.local
+.env.*.local
+
+# ── Uploads & temp ──
+uploads/
+server/uploads/
+server/doc_cache/
+
+# ── IDE ──
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ── OS ──
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── Logs ──
+*.log
+npm-debug.log*
+
+# ── Misc ──
+*.tgz
+coverage/

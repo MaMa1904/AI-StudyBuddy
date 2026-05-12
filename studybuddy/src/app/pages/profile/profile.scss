@@ -1,0 +1,293 @@
+.profile-page {
+  padding: 28px 24px;
+  max-width: 860px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+  animation: fadeInUp 0.5s ease;
+}
+
+/* ── Guest state ── */
+.profile-guest {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  text-align: center;
+  gap: 14px;
+
+  h2 { font-size: 22px; font-weight: 700; }
+  p  { font-size: 14px; color: var(--text2); max-width: 360px; line-height: 1.7; }
+}
+
+.guest-icon { font-size: 56px; margin-bottom: 8px; }
+
+/* ── Profile wrap ── */
+.profile-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ── Header card ── */
+.profile-header-card {
+  background: linear-gradient(135deg, rgba(79,70,229,0.12), rgba(124,58,237,0.12));
+  border: 1px solid rgba(79,70,229,0.25);
+  border-radius: var(--r24);
+  padding: 28px;
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  position: relative;
+}
+
+.profile-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: var(--grad);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+  box-shadow: 0 8px 24px rgba(79,70,229,0.4);
+}
+
+.profile-info {
+  flex: 1;
+  min-width: 0;
+
+  h1 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+}
+
+.profile-email { font-size: 13px; color: var(--text2); margin-bottom: 3px; }
+.profile-since { font-size: 12px; color: var(--text3); }
+
+.edit-btn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--glass);
+  color: var(--text2);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  transition: all 0.2s;
+
+  &:hover { background: var(--glass2); color: var(--text); }
+}
+
+.edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.edit-input {
+  padding: 9px 12px;
+  background: var(--glass2);
+  border: 1px solid var(--border);
+  border-radius: var(--r8);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+  font-family: 'Sora', sans-serif;
+  width: 100%;
+  max-width: 320px;
+
+  &:focus { outline: none; border-color: rgba(79,70,229,0.6); }
+}
+
+.edit-actions { display: flex; gap: 8px; }
+
+.save-msg {
+  font-size: 12px;
+  color: var(--green);
+  margin-top: 6px;
+
+  &--error { color: #EF4444; }
+}
+
+/* ── Stats grid ── */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px;
+}
+
+.stat-tile {
+  background: var(--glass);
+  border: 1px solid var(--border);
+  border-radius: var(--r16);
+  padding: 18px 14px;
+  text-align: center;
+  transition: all 0.3s;
+
+  &:hover { background: var(--glass2); transform: translateY(-2px); }
+}
+
+.stat-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--r12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  margin: 0 auto 10px;
+}
+
+.stat-val { font-size: 26px; font-weight: 700; line-height: 1; }
+.stat-lbl { font-size: 11px; color: var(--text2); margin-top: 4px; }
+
+/* ── Section card ── */
+.section-card {
+  background: var(--glass);
+  border: 1px solid var(--border);
+  border-radius: var(--r16);
+  padding: 20px;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+
+  h2 {
+    font-size: 15px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    i { color: var(--indigo-light); font-size: 17px; }
+  }
+}
+
+.section-link {
+  font-size: 12px;
+  color: var(--indigo-light);
+  text-decoration: none;
+  &:hover { opacity: 0.8; }
+}
+
+/* ── Attempts ── */
+.attempts-list { display: flex; flex-direction: column; gap: 8px; }
+
+.attempt-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  background: var(--glass2);
+  border-radius: var(--r8);
+}
+
+.attempt-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--r8);
+  background: rgba(79,70,229,0.12);
+  color: var(--indigo-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.attempt-info { flex: 1; min-width: 0; }
+.attempt-doc  { font-size: 12px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.attempt-meta { font-size: 11px; color: var(--text3); margin-top: 2px; }
+
+.attempt-score {
+  font-size: 15px;
+  font-weight: 700;
+  flex-shrink: 0;
+  color: var(--indigo-light);
+  &.score-good { color: var(--green); }
+  &.score-bad  { color: var(--red); }
+}
+
+/* ── Settings ── */
+.settings-list { display: flex; flex-direction: column; gap: 0; }
+
+.settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+  gap: 16px;
+  flex-wrap: wrap;
+
+  &:last-child { border-bottom: none; }
+  &--danger .settings-label { color: #EF4444; }
+}
+
+.settings-info { flex: 1; min-width: 0; }
+.settings-label { font-size: 13px; font-weight: 500; margin-bottom: 2px; }
+.settings-value { font-size: 12px; color: var(--text3); }
+
+.btn-danger {
+  padding: 7px 14px;
+  border-radius: var(--r8);
+  background: rgba(239,68,68,0.12);
+  border: 1px solid rgba(239,68,68,0.3);
+  color: #EF4444;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Sora', sans-serif;
+  transition: all 0.2s;
+  white-space: nowrap;
+
+  &:hover { background: rgba(239,68,68,0.2); }
+}
+
+/* ── Confirm overlay ── */
+.confirm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 600;
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: fadeIn 0.2s ease;
+}
+
+.confirm-card {
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-radius: var(--r16);
+  padding: 28px;
+  max-width: 360px;
+  width: 100%;
+  text-align: center;
+  animation: fadeInUp 0.25s ease;
+
+  h3 { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+  p  { font-size: 13px; color: var(--text2); margin-bottom: 20px; line-height: 1.6; }
+}
+
+.confirm-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}

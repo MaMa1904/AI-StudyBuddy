@@ -1,0 +1,178 @@
+<div class="profile-page" role="main">
+
+  <!-- Not logged in -->
+  @if (!auth.isLoggedIn()) {
+    <div class="profile-guest">
+      <div class="guest-icon" aria-hidden="true">👤</div>
+      <h2>You're not signed in</h2>
+      <p>Create an account to save your study progress, streaks, and documents permanently.</p>
+      <a class="btn-primary" routerLink="/">
+        <i class="ti ti-home" aria-hidden="true"></i> Go to Home
+      </a>
+    </div>
+
+  } @else {
+    <div class="profile-wrap">
+
+      <!-- Header card -->
+      <div class="profile-header-card">
+        <div class="profile-avatar" aria-hidden="true">{{ auth.currentUser()?.avatar }}</div>
+        <div class="profile-info">
+          @if (!editMode()) {
+            <h1>{{ auth.currentUser()?.name }}</h1>
+            <p class="profile-email">{{ auth.currentUser()?.email }}</p>
+            <p class="profile-since">Member since {{ formatDate(auth.currentUser()!.createdAt) }}</p>
+          } @else {
+            <div class="edit-form">
+              <label for="edit-name" class="sr-only">Display name</label>
+              <input
+                id="edit-name"
+                type="text"
+                [(ngModel)]="editName"
+                placeholder="Your name"
+                class="edit-input"
+                (keydown.enter)="saveEdit()"
+                (keydown.escape)="editMode.set(false)"
+                autofocus>
+              <div class="edit-actions">
+                <button class="btn-primary btn-sm" (click)="saveEdit()">
+                  <i class="ti ti-check" aria-hidden="true"></i> Save
+                </button>
+                <button class="btn-secondary btn-sm" (click)="editMode.set(false)">Cancel</button>
+              </div>
+            </div>
+          }
+          @if (saveMsg()) {
+            <p class="save-msg" [class.save-msg--error]="saveMsgType() === 'error'" role="status" aria-live="polite">{{ saveMsg() }}</p>
+          }
+        </div>
+        @if (!editMode()) {
+          <button class="edit-btn" (click)="startEdit()" aria-label="Edit profile name">
+            <i class="ti ti-pencil" aria-hidden="true"></i>
+          </button>
+        }
+      </div>
+
+      <!-- Stats grid -->
+      <div class="stats-grid" role="list" aria-label="Your study statistics">
+        <div class="stat-tile" role="listitem">
+          <div class="stat-icon" style="background:rgba(79,70,229,0.12);color:var(--indigo-light)" aria-hidden="true">
+            <i class="ti ti-files"></i>
+          </div>
+          <div class="stat-val grad-text">{{ data.stats().documents }}</div>
+          <div class="stat-lbl">Documents</div>
+        </div>
+        <div class="stat-tile" role="listitem">
+          <div class="stat-icon" style="background:rgba(16,185,129,0.12);color:#10B981" aria-hidden="true">
+            <i class="ti ti-cards"></i>
+          </div>
+          <div class="stat-val" style="color:var(--green)">{{ data.stats().cardsStudied }}</div>
+          <div class="stat-lbl">Cards Studied</div>
+        </div>
+        <div class="stat-tile" role="listitem">
+          <div class="stat-icon" style="background:rgba(251,191,36,0.12);color:#FBBF24" aria-hidden="true">
+            <i class="ti ti-help-circle"></i>
+          </div>
+          <div class="stat-val" style="color:var(--yellow)">{{ data.stats().quizzesDone }}</div>
+          <div class="stat-lbl">Quizzes Done</div>
+        </div>
+        <div class="stat-tile" role="listitem">
+          <div class="stat-icon" style="background:rgba(124,58,237,0.12);color:var(--purple-light)" aria-hidden="true">
+            <i class="ti ti-clock"></i>
+          </div>
+          <div class="stat-val" style="color:var(--purple-light)">{{ data.stats().studyHours }}h</div>
+          <div class="stat-lbl">Study Time</div>
+        </div>
+        <div class="stat-tile" role="listitem">
+          <div class="stat-icon" style="background:rgba(239,68,68,0.12);color:#EF4444" aria-hidden="true">
+            <i class="ti ti-flame"></i>
+          </div>
+          <div class="stat-val" style="color:var(--red)">{{ data.stats().streak }}</div>
+          <div class="stat-lbl">Day Streak</div>
+        </div>
+        <div class="stat-tile" role="listitem">
+          <div class="stat-icon" style="background:rgba(37,99,235,0.12);color:var(--blue-light)" aria-hidden="true">
+            <i class="ti ti-database"></i>
+          </div>
+          <div class="stat-val" style="color:var(--blue-light)">{{ storageUsed() }} KB</div>
+          <div class="stat-lbl">Storage Used</div>
+        </div>
+      </div>
+
+      <!-- Recent activity -->
+      @if (data.quizAttempts().length > 0) {
+        <div class="section-card">
+          <div class="section-header">
+            <h2><i class="ti ti-history" aria-hidden="true"></i> Recent Quiz Attempts</h2>
+            <a class="section-link" routerLink="/quiz">View all</a>
+          </div>
+          <div class="attempts-list" role="list">
+            @for (attempt of data.quizAttempts().slice(0, 5); track attempt.id) {
+              <div class="attempt-row" role="listitem">
+                <div class="attempt-icon" aria-hidden="true"><i class="ti ti-help-circle"></i></div>
+                <div class="attempt-info">
+                  <div class="attempt-doc">{{ attempt.docName }}</div>
+                  <div class="attempt-meta">{{ data.timeAgo(attempt.date) }} · {{ attempt.totalQuestions }} questions · {{ Math.floor(attempt.timeTaken / 60) }}m {{ attempt.timeTaken % 60 }}s</div>
+                </div>
+                <div class="attempt-score" [class.score-good]="attempt.score >= 70" [class.score-bad]="attempt.score < 50">
+                  {{ attempt.score }}%
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- Account settings -->
+      <div class="section-card">
+        <div class="section-header">
+          <h2><i class="ti ti-settings" aria-hidden="true"></i> Account</h2>
+        </div>
+        <div class="settings-list">
+          <div class="settings-row">
+            <div class="settings-info">
+              <div class="settings-label">Email address</div>
+              <div class="settings-value">{{ auth.currentUser()?.email }}</div>
+            </div>
+          </div>
+          <div class="settings-row">
+            <div class="settings-info">
+              <div class="settings-label">Local storage</div>
+              <div class="settings-value">{{ storageUsed() }} KB used by StudyBuddy</div>
+            </div>
+            @if (hasGuestData()) {
+              <button class="btn-secondary btn-sm" (click)="clearGuestData()">Clear Guest Data</button>
+            }
+          </div>
+          <div class="settings-row settings-row--danger">
+            <div class="settings-info">
+              <div class="settings-label">Sign out</div>
+              <div class="settings-value">You'll need to sign in again to access your data</div>
+            </div>
+            <button class="btn-danger btn-sm" (click)="confirmLogout()">
+              <i class="ti ti-logout" aria-hidden="true"></i> Sign Out
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  }
+
+  <!-- Logout confirmation -->
+  @if (showConfirm()) {
+    <div class="confirm-overlay" role="dialog" aria-modal="true" aria-label="Confirm sign out">
+      <div class="confirm-card">
+        <h3>Sign out?</h3>
+        <p>Your data is saved and will be here when you sign back in.</p>
+        <div class="confirm-actions">
+          <button class="btn-secondary" (click)="cancelLogout()">Cancel</button>
+          <button class="btn-danger" (click)="logout()">
+            <i class="ti ti-logout" aria-hidden="true"></i> Sign Out
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+</div>

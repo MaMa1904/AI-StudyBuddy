@@ -1,0 +1,338 @@
+<div class="workspace" role="main">
+
+  <!-- ── Sidebar ── -->
+  <aside class="ws-sidebar" aria-label="Document library">
+
+    <!-- Backend status indicator -->
+    <div class="backend-status" [class.online]="backendOnline() === true" [class.offline]="backendOnline() === false" [class.checking]="backendOnline() === null">
+      <div class="status-dot" aria-hidden="true"></div>
+      @if (backendOnline() === null) { <span>Checking AI server…</span> }
+      @else if (backendOnline()) { <span>AI Server Online</span> }
+      @else { <span>AI Offline — <a class="link-btn" href="https://aistudio.google.com/app/apikey" target="_blank">Setup guide</a></span> }
+    </div>
+
+    <!-- Upload trigger -->
+    <div
+      class="sidebar-upload"
+      [class.drag]="isDragging()"
+      (dragover)="onDragOver($event)"
+      (dragleave)="onDragLeave()"
+      (drop)="onDrop($event)"
+      (click)="fileInput.click()"
+      role="button"
+      tabindex="0"
+      aria-label="Upload PDF"
+      (keydown.enter)="fileInput.click()">
+      <input #fileInput type="file" accept=".pdf" multiple (change)="onFileSelect($event)" style="display:none" aria-hidden="true">
+      <i class="ti ti-upload" aria-hidden="true"></i>
+      <span>Upload PDF</span>
+    </div>
+
+    <!-- Error message -->
+    @if (errorMsg()) {
+      <div class="sidebar-error" role="alert">
+        <i class="ti ti-alert-circle" aria-hidden="true"></i>
+        {{ errorMsg() }}
+      </div>
+    }
+
+    <!-- Document list -->
+    <h4 class="sidebar-heading">My Documents</h4>
+
+    @if (data.documents().length === 0) {
+      <div class="sidebar-empty">
+        <i class="ti ti-file-off" aria-hidden="true"></i>
+        <p>No documents yet.<br>Upload a PDF to get started.</p>
+      </div>
+    } @else {
+      <nav aria-label="Document list">
+        @for (doc of data.documents(); track doc.id) {
+          <div class="doc-item-wrap">
+            <button
+              class="doc-item"
+              [class.active]="doc.id === selectedDocId()"
+              (click)="selectDoc(doc.id)"
+              [attr.aria-current]="doc.id === selectedDocId() ? 'page' : null"
+              [title]="doc.name">
+              <i class="ti ti-file-type-pdf" style="color:#EF4444;flex-shrink:0" aria-hidden="true"></i>
+              <div class="doc-item-info">
+                <div class="doc-item-name">{{ doc.name }}</div>
+                <div class="doc-item-meta">{{ formatSize(doc.size) }} · {{ timeAgo(doc.uploadDate) }}</div>
+                @if (doc.status === 'processing') {
+                  <div class="prog-bar" style="margin-top:4px">
+                    <div class="prog-fill" [style.width.%]="doc.progress"></div>
+                  </div>
+                }
+              </div>
+              <span class="doc-badge" [class.doc-badge--ready]="doc.status === 'ready'" [class.doc-badge--proc]="doc.status === 'processing'">
+                @if (doc.status === 'ready') { <i class="ti ti-check"></i> } @else { {{ doc.progress }}% }
+              </span>
+            </button>
+            <button class="doc-remove" (click)="removeDoc(doc.id, $event)" [attr.aria-label]="'Remove ' + doc.name" title="Remove">
+              <i class="ti ti-x"></i>
+            </button>
+          </div>
+        }
+      </nav>
+    }
+
+    @if (!auth.isLoggedIn() && data.documents().length > 0) {
+      <div class="sidebar-signin-note">
+        <i class="ti ti-info-circle" aria-hidden="true"></i>
+        <span>Sign in to save documents permanently.</span>
+        <button class="link-btn" (click)="showAuthModal.set(true)">Sign in</button>
+      </div>
+    }
+  </aside>
+
+  <!-- ── Main Content ── -->
+  <main class="ws-main" aria-label="Document content">
+
+    @if (!selectedDoc()) {
+      <div class="ws-empty">
+        <div class="ws-empty-icon" aria-hidden="true"><i class="ti ti-file-text"></i></div>
+        <h2>No document selected</h2>
+        <p>Upload a PDF to get AI-generated summaries, flashcards, and quizzes.</p>
+        <button class="btn-primary" (click)="fileInput2.click()">
+          <i class="ti ti-upload" aria-hidden="true"></i> Upload a PDF
+        </button>
+        <input #fileInput2 type="file" accept=".pdf" multiple (change)="onFileSelect($event)" style="display:none" aria-hidden="true">
+      </div>
+
+    } @else if (selectedDoc()!.status === 'processing') {
+      <div class="ws-processing">
+        <div class="processing-spinner" aria-hidden="true"></div>
+        <h2>
+          @if (backendOnline()) { AI is processing your PDF… }
+          @else { Processing your PDF… }
+        </h2>
+        <p class="processing-filename">{{ selectedDoc()!.name }}</p>
+        @if (aiProgress.message) {
+          <p class="processing-step">{{ aiProgress.message }}</p>
+        }
+        <div class="prog-bar" style="max-width:320px;margin:16px auto 0">
+          <div class="prog-fill" [style.width.%]="selectedDoc()!.progress"></div>
+        </div>
+        <p class="processing-pct">{{ selectedDoc()!.progress }}% complete</p>
+      </div>
+
+    } @else if (selectedDoc()!.status === 'error') {
+      <div class="ws-empty">
+        <div class="ws-empty-icon" style="background:rgba(239,68,68,0.1);color:#EF4444" aria-hidden="true">
+          <i class="ti ti-alert-circle"></i>
+        </div>
+        <h2>Processing failed</h2>
+        <p>{{ errorMsg() || 'Something went wrong. Please re-upload the PDF and try again.' }}</p>
+        <button class="btn-primary" (click)="fileInput3.click()">
+          <i class="ti ti-upload" aria-hidden="true"></i> Re-upload PDF
+        </button>
+        <input #fileInput3 type="file" accept=".pdf" multiple (change)="onFileSelect($event)" style="display:none" aria-hidden="true">
+      </div>
+
+    } @else {
+      <!-- Document ready -->
+      <div class="ws-main-header">
+        <div>
+          <h2>{{ selectedDoc()!.name }}</h2>
+          <p class="doc-meta-line">
+            {{ formatSize(selectedDoc()!.size) }}
+            @if (selectedDoc()!.pages) { · {{ selectedDoc()!.pages }} pages }
+            @if (selectedDoc()!.subject) {
+              <span class="subject-badge">{{ selectedDoc()!.subject }}</span>
+            }
+          </p>
+        </div>
+        <div class="ws-main-actions">
+          <button
+            class="btn-secondary btn-sm"
+            (click)="toggleReadAloud()"
+            [class.btn-active]="ttsActive()"
+            [attr.aria-label]="ttsActive() ? 'Stop reading' : 'Read aloud'"
+            [attr.aria-pressed]="ttsActive()">
+            <i class="ti" [class.ti-player-stop]="ttsActive()" [class.ti-volume]="!ttsActive()" aria-hidden="true"></i>
+            {{ ttsActive() ? 'Stop' : 'Read Aloud' }}
+          </button>
+          <button
+            class="btn-secondary btn-sm"
+            (click)="exportNotes()"
+            [disabled]="!summaries().length"
+            aria-label="Export notes as Markdown">
+            <i class="ti ti-download" aria-hidden="true"></i> Export
+          </button>
+        </div>
+      </div>
+
+      <!-- Summaries -->
+      @if (summaries().length === 0) {
+        <div class="no-summaries">
+          <i class="ti ti-sparkles" aria-hidden="true"></i>
+          <p>
+            @if (backendOnline()) {
+              Click <strong>Generate All</strong> in the AI Tools panel to create summaries, flashcards, and quiz questions from this document.
+            } @else {
+              Start the AI server to generate summaries. See the setup guide in the sidebar.
+            }
+          </p>
+        </div>
+      } @else {
+        @for (section of summaries(); track section.id) {
+          <div class="summary-card">
+            <button
+              class="summary-header"
+              (click)="toggleSection(section.id)"
+              [attr.aria-expanded]="isSectionExpanded(section.id)"
+              [attr.aria-controls]="'section-' + section.id">
+              <h4>
+                <i class="ti {{ section.icon }}" [style.color]="section.iconColor" aria-hidden="true"></i>
+                {{ section.title }}
+              </h4>
+              <i class="ti" [class.ti-chevron-down]="isSectionExpanded(section.id)" [class.ti-chevron-right]="!isSectionExpanded(section.id)" aria-hidden="true"></i>
+            </button>
+            @if (isSectionExpanded(section.id)) {
+              <div class="summary-body" [id]="'section-' + section.id" role="region">
+                <p>{{ section.content }}</p>
+                @if (section.keyPoints?.length) {
+                  <div class="key-points" role="list">
+                    @for (point of section.keyPoints; track point) {
+                      <div class="key-point" role="listitem">
+                        <div class="key-dot" aria-hidden="true"></div>
+                        <span>{{ point }}</span>
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        }
+      }
+    }
+  </main>
+
+  <!-- ── AI Tools Sidebar ── -->
+  <aside class="ws-ai" aria-label="AI tools panel">
+    <div class="ai-panel-title">
+      <i class="ti ti-sparkles" style="color:var(--indigo-light)" aria-hidden="true"></i>
+      AI Tools
+      @if (backendOnline()) {
+        <span class="ai-online-badge">Live</span>
+      }
+    </div>
+
+    <!-- Main generate button -->
+    <button
+      class="ai-btn ai-btn-primary"
+      (click)="regenerate()"
+      [disabled]="isGenerating || !selectedDoc() || selectedDoc()?.status !== 'ready' || !backendOnline()"
+      aria-label="Generate AI summary, flashcards and quiz">
+      @if (isGenerating) {
+        <span class="loading-dots" aria-label="Generating..."><span></span><span></span><span></span></span>
+        {{ aiProgress.message || 'Generating…' }}
+      } @else {
+        <i class="ti ti-wand" aria-hidden="true"></i>
+        Generate All
+      }
+    </button>
+
+    <button class="ai-btn ai-btn-secondary" [disabled]="!selectedDoc() || !backendOnline() || !summaries().length" (click)="openSimplerExplanation()">
+      <i class="ti ti-arrows-down-up" aria-hidden="true"></i>
+      Simpler Explanation
+    </button>
+    <button class="ai-btn ai-btn-secondary" [disabled]="!selectedDoc() || !backendOnline() || !summaries().length" (click)="openExpandDetail()">
+      <i class="ti ti-zoom-in" aria-hidden="true"></i>
+      Expand Detail
+    </button>
+
+    <div class="ai-divider" role="separator"></div>
+
+    <a class="ai-btn ai-btn-secondary" routerLink="/flashcards">
+      <i class="ti ti-cards" aria-hidden="true"></i>
+      Study Flashcards
+      @if (data.flashcards().length > 0) {
+        <span class="ai-count-badge">{{ data.flashcards().length }}</span>
+      }
+    </a>
+    <a class="ai-btn ai-btn-secondary" routerLink="/quiz">
+      <i class="ti ti-help-circle" aria-hidden="true"></i>
+      Take a Quiz
+    </a>
+
+    <div class="ai-divider" role="separator"></div>
+
+    <!-- Generation Progress -->
+    <div class="gen-progress-title">Generation Progress</div>
+    @for (step of aiProgress.steps; track step.label) {
+      <div class="gen-item">
+        <div class="gen-item-header">
+          <span>{{ step.label }}</span>
+          <span class="gen-status"
+            [style.color]="step.value === 100 ? 'var(--green)' : step.value === 0 ? 'var(--text3)' : 'var(--indigo-light)'">
+            {{ step.status }}
+          </span>
+        </div>
+        <div class="prog-bar">
+          <div class="prog-fill" [style.width.%]="step.value" [style.background]="step.color"></div>
+        </div>
+      </div>
+    }
+
+    <!-- Offline warning -->
+    @if (backendOnline() === false) {
+      <div class="ai-offline-note">
+        <i class="ti ti-server-off" aria-hidden="true"></i>
+        <div>
+          <strong>AI server not running</strong>
+          <p>Run <code>npm run dev</code> in the <code>server/</code> folder and add your Gemini API key to <code>server/.env</code></p>
+        </div>
+      </div>
+    }
+
+    @if (!auth.isLoggedIn()) {
+      <div class="ai-signin-note">
+        <i class="ti ti-lock" aria-hidden="true"></i>
+        <span>Sign in to save generated content.</span>
+        <button class="link-btn" (click)="showAuthModal.set(true)">Sign in</button>
+      </div>
+    }
+  </aside>
+
+</div>
+
+@if (showAuthModal()) {
+  <app-auth-modal (close)="showAuthModal.set(false)" />
+}
+
+<!-- AI Response Modal (Simpler Explanation / Expand Detail) -->
+@if (showAiModal()) {
+  <div class="ai-modal-overlay" (click)="showAiModal.set(false)" role="dialog" aria-modal="true" [attr.aria-label]="aiModalTitle()">
+    <div class="ai-modal-card" (click)="$event.stopPropagation()">
+      <div class="ai-modal-header">
+        <div class="ai-modal-title">
+          <i class="ti ti-sparkles" style="color:var(--indigo-light)" aria-hidden="true"></i>
+          {{ aiModalTitle() }}
+        </div>
+        <button class="close-btn" (click)="showAiModal.set(false)" aria-label="Close">
+          <i class="ti ti-x"></i>
+        </button>
+      </div>
+      <div class="ai-modal-body">
+        @if (aiModalLoading()) {
+          <div class="ai-modal-loading">
+            <div class="processing-spinner" aria-hidden="true"></div>
+            <p>Gemini is thinking…</p>
+          </div>
+        } @else {
+          <p class="ai-modal-text">{{ aiModalContent() }}</p>
+        }
+      </div>
+      @if (!aiModalLoading()) {
+        <div class="ai-modal-footer">
+          <button class="btn-secondary btn-sm" (click)="showAiModal.set(false)">Close</button>
+          <button class="btn-primary btn-sm" (click)="copyToClipboard(aiModalContent())">
+            <i class="ti ti-copy" aria-hidden="true"></i> Copy
+          </button>
+        </div>
+      }
+    </div>
+  </div>
+}

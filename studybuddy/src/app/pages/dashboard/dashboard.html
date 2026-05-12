@@ -1,0 +1,265 @@
+<div class="dash" role="main">
+
+  <!-- Header -->
+  <div class="dash-header">
+    <div>
+      <h1>{{ greeting() }}</h1>
+      @if (auth.isLoggedIn() && data.stats().streak > 0) {
+        <p>You're on a <strong>{{ data.stats().streak }}-day streak</strong> — keep it up!</p>
+      } @else if (auth.isLoggedIn()) {
+        <p>Welcome back! Upload a PDF to start studying.</p>
+      } @else {
+        <p>You're browsing as a guest. <button class="inline-link" (click)="showAuthModal.set(true)">Sign in</button> to save your progress.</p>
+      }
+    </div>
+    <div class="dash-header-actions">
+      @if (data.stats().streak > 0) {
+        <div class="badge badge-yellow">
+          <i class="ti ti-flame" aria-hidden="true"></i>
+          {{ data.stats().streak }} day streak
+        </div>
+      }
+      <a class="btn-primary btn-sm" routerLink="/workspace">
+        <i class="ti ti-plus" aria-hidden="true"></i>
+        New Session
+      </a>
+    </div>
+  </div>
+
+  <!-- Guest banner -->
+  @if (!auth.isLoggedIn()) {
+    <div class="guest-banner" role="status">
+      <div class="guest-banner-left">
+        <i class="ti ti-info-circle" aria-hidden="true"></i>
+        <span>Sign in to save your documents, flashcards, quiz history, and streaks across sessions.</span>
+      </div>
+      <button class="btn-primary btn-sm" (click)="showAuthModal.set(true)">
+        <i class="ti ti-login" aria-hidden="true"></i> Sign In
+      </button>
+    </div>
+  }
+
+  <!-- Stats Row -->
+  <div class="stats-row" role="list" aria-label="Study statistics">
+    <div class="stat-card" role="listitem">
+      <div class="stat-val grad-text">{{ data.stats().documents }}</div>
+      <div class="stat-lbl">Documents</div>
+      <div class="stat-sub">{{ data.stats().documents === 0 ? 'Upload your first PDF' : data.stats().documents + ' uploaded' }}</div>
+    </div>
+    <div class="stat-card" role="listitem">
+      <div class="stat-val" style="color:var(--green)">{{ data.stats().cardsStudied }}</div>
+      <div class="stat-lbl">Cards Studied</div>
+      <div class="stat-sub">{{ data.stats().cardsStudied === 0 ? 'Start studying' : 'Total reviewed' }}</div>
+    </div>
+    <div class="stat-card" role="listitem">
+      <div class="stat-val" style="color:var(--yellow)">{{ data.stats().quizzesDone }}</div>
+      <div class="stat-lbl">Quizzes Done</div>
+      <div class="stat-sub">{{ data.stats().quizzesDone === 0 ? 'Take your first quiz' : 'Avg: ' + avgQuizScore() + '%' }}</div>
+    </div>
+    <div class="stat-card" role="listitem">
+      <div class="stat-val" style="color:var(--purple-light)">{{ data.stats().studyHours }}h</div>
+      <div class="stat-lbl">Study Time</div>
+      <div class="stat-sub">{{ data.stats().studyHours === 0 ? 'No sessions yet' : 'Total logged' }}</div>
+    </div>
+  </div>
+
+  <!-- Main Grid -->
+  <div class="dash-grid">
+
+    <!-- Left Column -->
+    <div class="dash-main">
+
+      <!-- Recent Documents -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <i class="ti ti-files" aria-hidden="true"></i>
+            Recent Documents
+          </div>
+          @if (hasDocuments()) {
+            <a class="panel-action" routerLink="/workspace">View all</a>
+          }
+        </div>
+
+        @if (hasDocuments()) {
+          <div class="doc-list" role="list">
+            @for (doc of data.documents().slice(0, 4); track doc.id) {
+              <a class="doc-card" routerLink="/workspace" role="listitem" [attr.aria-label]="doc.name">
+                <div class="doc-icon doc-icon--default" aria-hidden="true">
+                  <i class="ti ti-file-type-pdf"></i>
+                </div>
+                <div class="doc-info">
+                  <div class="doc-name">{{ doc.name }}</div>
+                  <div class="doc-meta">{{ formatSize(doc.size) }} · {{ timeAgo(doc.uploadDate) }}</div>
+                  @if (doc.status === 'processing') {
+                    <div class="prog-bar" style="max-width:180px;margin-top:5px">
+                      <div class="prog-fill" [style.width.%]="doc.progress"></div>
+                    </div>
+                  }
+                </div>
+                <span
+                  class="doc-status badge"
+                  [class.badge-green]="doc.status === 'ready'"
+                  [class.badge-yellow]="doc.status === 'processing'">
+                  @if (doc.status === 'processing') { {{ doc.progress }}% } @else { Ready }
+                </span>
+              </a>
+            }
+          </div>
+        } @else {
+          <div class="empty-state">
+            <i class="ti ti-file-upload" aria-hidden="true"></i>
+            <p>No documents yet</p>
+            <a class="btn-primary btn-sm" routerLink="/workspace">
+              <i class="ti ti-upload" aria-hidden="true"></i> Upload a PDF
+            </a>
+          </div>
+        }
+      </div>
+
+      <!-- Quiz Performance Chart -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <i class="ti ti-chart-bar" aria-hidden="true"></i>
+            Quiz Performance
+          </div>
+          <span class="panel-meta">Last {{ chartBars().length }} quizzes</span>
+        </div>
+
+        @if (chartBars().length > 0) {
+          <div class="mini-chart" role="img" [attr.aria-label]="'Quiz scores for last ' + chartBars().length + ' quizzes'">
+            @for (bar of chartBars(); track $index) {
+              <div
+                class="bar"
+                [class.active]="bar.active"
+                [style.height.%]="bar.height"
+                [title]="'Score: ' + bar.score + '%'">
+              </div>
+            }
+          </div>
+          <div class="chart-labels" aria-hidden="true">
+            @for (bar of chartBars(); track $index) {
+              <span>Q{{ $index + 1 }}</span>
+            }
+          </div>
+        } @else {
+          <div class="empty-state">
+            <i class="ti ti-chart-bar" aria-hidden="true"></i>
+            <p>No quiz data yet</p>
+            <a class="btn-secondary btn-sm" routerLink="/quiz">Take a Quiz</a>
+          </div>
+        }
+      </div>
+
+      <!-- Recent Quiz Attempts -->
+      @if (hasQuizzes()) {
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">
+              <i class="ti ti-history" aria-hidden="true"></i>
+              Recent Quiz Attempts
+            </div>
+          </div>
+          <div class="attempts-list" role="list">
+            @for (attempt of data.quizAttempts().slice(0, 3); track attempt.id) {
+              <div class="attempt-row" role="listitem">
+                <div class="attempt-info">
+                  <div class="attempt-doc">{{ attempt.docName }}</div>
+                  <div class="attempt-meta">{{ timeAgo(attempt.date) }} · {{ attempt.totalQuestions }} questions</div>
+                </div>
+                <div class="attempt-score" [class.score-good]="attempt.score >= 70" [class.score-bad]="attempt.score < 50">
+                  {{ attempt.score }}%
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+    </div>
+
+    <!-- Right Column -->
+    <div class="dash-side">
+
+      <!-- Study Streak Heatmap -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <i class="ti ti-calendar" aria-hidden="true"></i>
+            Study Activity
+          </div>
+          @if (data.stats().streak > 0) {
+            <span aria-hidden="true">🔥</span>
+          }
+        </div>
+        <div class="heatmap" role="img" aria-label="Study activity heatmap for the last 4 weeks">
+          @for (cell of heatmapCells(); track $index) {
+            <div class="heat-cell" [class]="heatClass(cell)"></div>
+          }
+        </div>
+        <p class="heatmap-label">
+          @if (data.stats().streak > 0) {
+            {{ data.stats().streak }}-day streak 🔥
+          } @else {
+            Start studying to build your streak
+          }
+        </p>
+      </div>
+
+      <!-- Flashcard Stats -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <i class="ti ti-cards" aria-hidden="true"></i>
+            Flashcard Progress
+          </div>
+        </div>
+
+        @if (subjectProgress().length > 0) {
+          <div class="fc-stats">
+            @for (sub of subjectProgress(); track sub.name) {
+              <div class="fc-stat-row">
+                <div class="fc-stat-header">
+                  <span>{{ sub.name }}</span>
+                  <span class="fc-pct">{{ sub.pct }}%</span>
+                </div>
+                <div class="prog-bar">
+                  <div class="prog-fill" [style.width.%]="sub.pct" [style.background]="sub.color"></div>
+                </div>
+              </div>
+            }
+          </div>
+        } @else {
+          <div class="empty-state" style="padding:16px 0">
+            <i class="ti ti-cards" aria-hidden="true"></i>
+            <p>No flashcards yet</p>
+          </div>
+        }
+
+        <a class="btn-secondary btn-sm" routerLink="/flashcards" style="margin-top:14px;width:100%;justify-content:center">
+          <i class="ti ti-arrow-right" aria-hidden="true"></i>
+          Study Flashcards
+        </a>
+      </div>
+
+      <!-- Sign-in prompt for guests -->
+      @if (!auth.isLoggedIn()) {
+        <div class="panel signin-panel">
+          <div class="signin-icon" aria-hidden="true">🔐</div>
+          <h3>Save Your Progress</h3>
+          <p>Sign in to keep your documents, flashcards, quiz scores, and streaks forever.</p>
+          <button class="btn-primary" style="width:100%;justify-content:center;margin-top:12px" (click)="showAuthModal.set(true)">
+            <i class="ti ti-login" aria-hidden="true"></i> Sign In / Register
+          </button>
+        </div>
+      }
+
+    </div>
+  </div>
+</div>
+
+<!-- Auth Modal -->
+@if (showAuthModal()) {
+  <app-auth-modal (close)="showAuthModal.set(false)" />
+}

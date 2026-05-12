@@ -1,0 +1,175 @@
+<div class="flashcard-page" role="main">
+
+  <!-- Header -->
+  <div class="fc-header">
+    <div>
+      <h1>Flashcard Study</h1>
+      <p>{{ data.flashcards().length }} cards across {{ data.documents().length }} document{{ data.documents().length !== 1 ? 's' : '' }}</p>
+    </div>
+    <div class="fc-header-actions">
+      <button class="icon-btn" [class.active]="shuffled()" (click)="toggleShuffle()" aria-label="Shuffle cards" [attr.aria-pressed]="shuffled()">
+        <i class="ti ti-arrows-shuffle" aria-hidden="true"></i>
+      </button>
+      <button class="icon-btn" [class.active]="currentCard()?.isFavorite" (click)="toggleFavorite()" aria-label="Favorite this card" [attr.aria-pressed]="currentCard()?.isFavorite" [disabled]="!currentCard()">
+        <i class="ti" [class.ti-heart-filled]="currentCard()?.isFavorite" [class.ti-heart]="!currentCard()?.isFavorite" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- No flashcards empty state -->
+  @if (data.flashcards().length === 0) {
+    <div class="fc-empty">
+      <div class="fc-empty-icon" aria-hidden="true"><i class="ti ti-cards"></i></div>
+      <h2>No flashcards yet</h2>
+      <p>Upload a PDF in the Workspace and use the AI Tools to generate flashcards from your documents.</p>
+      <div class="fc-empty-actions">
+        <a class="btn-primary" routerLink="/workspace">
+          <i class="ti ti-upload" aria-hidden="true"></i>
+          Go to Workspace
+        </a>
+        @if (!auth.isLoggedIn()) {
+          <button class="btn-secondary" (click)="showAuthModal.set(true)">
+            <i class="ti ti-login" aria-hidden="true"></i>
+            Sign In to Save Progress
+          </button>
+        }
+      </div>
+    </div>
+
+  } @else {
+
+    <!-- Filters -->
+    <div class="fc-filters" role="group" aria-label="Filter flashcards by type">
+      @for (filter of filters; track filter) {
+        <button class="fc-filter" [class.active]="activeFilter() === filter" (click)="setFilter(filter)" [attr.aria-pressed]="activeFilter() === filter">
+          {{ filter }}
+        </button>
+      }
+    </div>
+
+    <!-- Progress -->
+    <div class="fc-progress-row">
+      <span aria-live="polite"><strong>{{ currentIndex() + 1 }}</strong> / {{ filteredCards().length }} cards</span>
+      <span class="fc-hint">Click card or press <kbd>Space</kbd> to flip · <kbd>←</kbd> <kbd>→</kbd> to navigate</span>
+    </div>
+    <div class="prog-bar" style="margin-bottom:20px">
+      <div class="prog-fill" [style.width.%]="progress()" role="progressbar" [attr.aria-valuenow]="progress()" aria-valuemin="0" aria-valuemax="100"></div>
+    </div>
+
+    <!-- Card Stack -->
+    @if (sessionDone()) {
+      <!-- Session complete state -->
+      <div class="session-complete">
+        <div class="session-complete-icon" aria-hidden="true">🎉</div>
+        <h2>Session Complete!</h2>
+        <p>You've reviewed all {{ filteredCards().length }} cards in this set.</p>
+        <div class="session-complete-stats">
+          <div class="sc-stat"><span style="color:var(--green)">{{ easyCount() }}</span><small>Easy</small></div>
+          <div class="sc-stat"><span style="color:var(--yellow)">{{ okCount() }}</span><small>Medium</small></div>
+          <div class="sc-stat"><span style="color:var(--red)">{{ hardCount() }}</span><small>Hard</small></div>
+        </div>
+        <div class="session-complete-actions">
+          <button class="btn-primary" (click)="restartSession()">
+            <i class="ti ti-refresh" aria-hidden="true"></i> Study Again
+          </button>
+          <a class="btn-secondary" routerLink="/quiz">
+            <i class="ti ti-help-circle" aria-hidden="true"></i> Take a Quiz
+          </a>
+        </div>
+      </div>
+
+    } @else if (currentCard(); as card) {
+      <div class="card-stack" role="region" aria-label="Flashcard">
+        <div class="card-shadow card-shadow-2" aria-hidden="true"></div>
+        <div class="card-shadow card-shadow-1" aria-hidden="true"></div>
+
+        <div
+          class="flashcard"
+          [class.flipped]="isFlipped()"
+          (click)="flipCard()"
+          (keydown.enter)="flipCard()"
+          (keydown.space)="flipCard()"
+          role="button"
+          tabindex="0"
+          [attr.aria-label]="isFlipped() ? 'Answer: ' + card.back : 'Question: ' + card.front + '. Press to flip.'">
+
+          <div class="card-face card-front">
+            <div class="card-label">{{ typeLabel(card.type) }}</div>
+            <div class="card-content">{{ card.front }}</div>
+            <div class="card-hint"><i class="ti ti-rotate-clockwise" aria-hidden="true"></i> Tap to reveal answer</div>
+            <span class="card-tag" [class]="difficultyClass(card.difficulty)">{{ card.difficulty | titlecase }}</span>
+          </div>
+
+          <div class="card-face card-back">
+            <div class="card-label">Answer</div>
+            <div class="card-content card-answer">{{ card.back }}</div>
+            @if (card.subject) {
+              <div class="card-sub">{{ card.subject }}</div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation -->
+      <div class="fc-nav">
+        <div class="fc-nav-btns">
+          <button class="icon-btn" (click)="prevCard()" [disabled]="currentIndex() === 0" aria-label="Previous card">
+            <i class="ti ti-arrow-left" aria-hidden="true"></i>
+          </button>
+          <button class="icon-btn" (click)="nextCard()" [disabled]="currentIndex() === filteredCards().length - 1" aria-label="Next card">
+            <i class="ti ti-arrow-right" aria-hidden="true"></i>
+          </button>
+        </div>
+        <div class="mark-btns" role="group" aria-label="Mark card difficulty">
+          <button class="mark-btn mark-hard" (click)="markCard('hard')"><i class="ti ti-flame" aria-hidden="true"></i> Hard</button>
+          <button class="mark-btn mark-ok"   (click)="markCard('ok')"><i class="ti ti-minus" aria-hidden="true"></i> Ok</button>
+          <button class="mark-btn mark-easy" (click)="markCard('easy')"><i class="ti ti-check" aria-hidden="true"></i> Easy</button>
+        </div>
+      </div>
+
+    } @else if (!sessionDone()) {
+      <div class="empty-state">
+        <i class="ti ti-cards" aria-hidden="true"></i>
+        <p>No cards match this filter.</p>
+      </div>
+    }
+
+    <!-- Stats -->
+    <div class="fc-stats-row" role="list" aria-label="Card difficulty statistics">
+      <div class="fc-stat" role="listitem">
+        <div class="fc-stat-val" style="color:var(--red)">{{ hardCount() }}</div>
+        <div class="fc-stat-lbl">Hard</div>
+      </div>
+      <div class="fc-stat" role="listitem">
+        <div class="fc-stat-val" style="color:var(--yellow)">{{ okCount() }}</div>
+        <div class="fc-stat-lbl">Medium</div>
+      </div>
+      <div class="fc-stat" role="listitem">
+        <div class="fc-stat-val" style="color:var(--green)">{{ easyCount() }}</div>
+        <div class="fc-stat-lbl">Easy</div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="fc-actions">
+      <button class="btn-secondary" style="flex:1;justify-content:center" (click)="downloadCards()" [disabled]="!filteredCards().length">
+        <i class="ti ti-download" aria-hidden="true"></i> Download Offline
+      </button>
+      <a class="btn-primary" routerLink="/quiz" style="flex:1;justify-content:center">
+        <i class="ti ti-arrow-right" aria-hidden="true"></i> Take Quiz
+      </a>
+    </div>
+
+    @if (!auth.isLoggedIn()) {
+      <div class="fc-signin-note">
+        <i class="ti ti-info-circle" aria-hidden="true"></i>
+        <span>Your progress isn't being saved. <button class="link-btn" (click)="showAuthModal.set(true)">Sign in</button> to keep your study history.</span>
+      </div>
+    }
+  }
+
+</div>
+
+@if (showAuthModal()) {
+  <app-auth-modal (close)="showAuthModal.set(false)" />
+}

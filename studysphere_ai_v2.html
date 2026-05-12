@@ -1,0 +1,857 @@
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+--indigo:#4F46E5;--indigo-light:#818CF8;--purple:#7C3AED;--purple-light:#A78BFA;
+--blue:#2563EB;--blue-light:#60A5FA;
+--bg:#0A0B1E;--bg2:#0F1030;
+--glass:rgba(255,255,255,0.05);--glass2:rgba(255,255,255,0.08);--glass3:rgba(255,255,255,0.12);
+--border:rgba(255,255,255,0.10);--border2:rgba(255,255,255,0.18);
+--text:#F0F0FF;--text2:#A8A8D0;--text3:#6B6B9A;
+--r8:8px;--r12:12px;--r16:16px;--r24:24px;
+--grad:linear-gradient(135deg,#4F46E5,#7C3AED);
+--grad2:linear-gradient(135deg,#2563EB,#4F46E5);
+--glow:0 0 30px rgba(79,70,229,0.25);
+}
+html,body{width:100%;overflow-x:hidden}
+body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;line-height:1.6}
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
+
+.orb{position:fixed;border-radius:50%;filter:blur(80px);pointer-events:none;z-index:0;opacity:0.3}
+.orb1{width:400px;height:400px;background:radial-gradient(circle,#4F46E5,transparent);top:-100px;left:-80px}
+.orb2{width:350px;height:350px;background:radial-gradient(circle,#7C3AED,transparent);bottom:-50px;right:-50px}
+
+/* NAV */
+.nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:12px 24px;background:rgba(10,11,30,0.90);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);gap:12px;flex-wrap:nowrap}
+.logo{display:flex;align-items:center;gap:8px;font-weight:700;font-size:17px;color:var(--text);flex-shrink:0}
+.logo-icon{width:30px;height:30px;background:var(--grad);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;flex-shrink:0}
+.logo span{background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.nav-tabs{display:flex;gap:2px;background:var(--glass);border:1px solid var(--border);border-radius:var(--r12);padding:3px;flex-shrink:0}
+.nav-tab{padding:6px 13px;border-radius:var(--r8);font-size:12px;font-weight:500;color:var(--text2);cursor:pointer;transition:all .2s;white-space:nowrap;border:none;background:none;font-family:'Sora',sans-serif}
+.nav-tab.active,.nav-tab:hover{background:var(--glass3);color:var(--text)}
+.nav-tab.active{background:var(--grad);color:#fff}
+.nav-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.nav-btn{padding:7px 13px;border-radius:var(--r8);font-size:12px;font-weight:500;cursor:pointer;transition:all .2s;border:1px solid var(--border);background:var(--glass);color:var(--text2);font-family:'Sora',sans-serif}
+.nav-btn:hover{background:var(--glass2);color:var(--text)}
+.nav-avatar{width:30px;height:30px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;cursor:pointer;color:#fff}
+
+/* PAGE SYSTEM */
+.page{display:none;position:relative;z-index:1}
+.page.active{display:block}
+
+/* ====== LANDING ====== */
+.landing-wrap{max-width:1000px;margin:0 auto;padding:0 24px 60px}
+.hero{text-align:center;padding:64px 0 48px}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;padding:5px 14px;background:rgba(79,70,229,0.15);border:1px solid rgba(79,70,229,0.4);border-radius:99px;font-size:12px;color:var(--indigo-light);margin-bottom:24px}
+.hero h1{font-size:clamp(32px,5vw,60px);font-weight:700;line-height:1.1;margin-bottom:16px}
+.hero h1 .grad{background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{font-size:16px;color:var(--text2);max-width:520px;margin:0 auto 28px}
+.hero-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.btn-primary{padding:12px 24px;background:var(--grad);border:none;border-radius:var(--r12);color:#fff;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;font-family:'Sora',sans-serif;display:inline-flex;align-items:center;gap:8px}
+.btn-primary:hover{opacity:.9;transform:translateY(-1px)}
+.btn-secondary{padding:12px 24px;background:var(--glass);border:1px solid var(--border2);border-radius:var(--r12);color:var(--text);font-size:14px;font-weight:500;cursor:pointer;transition:all .2s;font-family:'Sora',sans-serif;display:inline-flex;align-items:center;gap:8px}
+.btn-secondary:hover{background:var(--glass2)}
+
+/* UPLOAD */
+.upload-zone{border:2px dashed rgba(79,70,229,0.4);border-radius:var(--r24);padding:40px;text-align:center;background:rgba(79,70,229,0.05);transition:all .3s;cursor:pointer;margin-bottom:16px}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--indigo);background:rgba(79,70,229,0.10)}
+.upload-icon{font-size:44px;color:var(--indigo-light);margin-bottom:14px}
+.upload-zone h3{font-size:17px;font-weight:600;margin-bottom:6px}
+.upload-zone p{font-size:13px;color:var(--text2)}
+
+/* FEATURES */
+.section-title{text-align:center;margin-bottom:32px}
+.section-title h2{font-size:28px;font-weight:700;margin-bottom:6px}
+.section-title p{color:var(--text2);font-size:15px}
+.feat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px}
+.feat-card{background:var(--glass);border:1px solid var(--border);border-radius:var(--r16);padding:20px;transition:all .3s}
+.feat-card:hover{background:var(--glass2);border-color:var(--border2);transform:translateY(-2px)}
+.feat-icon{width:40px;height:40px;border-radius:var(--r12);display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:14px}
+.feat-card h3{font-size:15px;font-weight:600;margin-bottom:6px}
+.feat-card p{font-size:12px;color:var(--text2);line-height:1.6}
+
+/* ====== DASHBOARD ====== */
+.dash{padding:24px;max-width:1100px;margin:0 auto}
+.dash-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;flex-wrap:wrap;gap:14px}
+.streak-badge{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:rgba(251,191,36,0.1);border:1px solid rgba(251,191,36,0.3);border-radius:99px;font-size:12px;color:#FBBF24}
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:20px}
+.stat-card{background:var(--glass);border:1px solid var(--border);border-radius:var(--r16);padding:16px}
+.stat-val{font-size:26px;font-weight:700;line-height:1}
+.stat-lbl{font-size:12px;color:var(--text2);margin-top:4px}
+.stat-sub{font-size:11px;color:var(--text3);margin-top:2px}
+.dash-grid{display:grid;grid-template-columns:1fr 300px;gap:18px}
+.dash-main{display:flex;flex-direction:column;gap:18px}
+.panel{background:var(--glass);border:1px solid var(--border);border-radius:var(--r16);padding:18px}
+.panel-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.panel-title{font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px}
+.panel-action{font-size:12px;color:var(--indigo-light);cursor:pointer}
+.doc-list{display:flex;flex-direction:column;gap:8px}
+.doc-card{display:flex;align-items:center;gap:12px;padding:10px 12px;background:var(--glass2);border:1px solid var(--border);border-radius:var(--r12);cursor:pointer;transition:all .2s}
+.doc-card:hover{background:var(--glass3);border-color:var(--border2)}
+.doc-icon{width:36px;height:36px;border-radius:var(--r8);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.doc-info{flex:1;min-width:0}
+.doc-name{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.doc-meta{font-size:11px;color:var(--text2);margin-top:2px}
+.doc-status{padding:3px 8px;border-radius:99px;font-size:11px;font-weight:500;flex-shrink:0}
+.status-ready{background:rgba(16,185,129,0.15);color:#10B981}
+.status-proc{background:rgba(251,191,36,0.15);color:#FBBF24}
+.prog-bar{height:5px;background:var(--glass2);border-radius:99px;overflow:hidden;margin-top:6px}
+.prog-fill{height:100%;border-radius:99px;background:var(--grad);transition:width .5s ease}
+.mini-chart{display:flex;align-items:flex-end;gap:5px;height:70px;margin-top:8px}
+.bar{flex:1;border-radius:3px 3px 0 0;background:var(--glass3);transition:height .5s;min-height:6px;cursor:pointer}
+.bar:hover{opacity:.8}
+.bar.active{background:var(--grad)}
+.heatmap{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-top:8px}
+.heat-cell{aspect-ratio:1;border-radius:3px;background:var(--glass2)}
+.heat-cell.l1{background:rgba(79,70,229,0.25)}
+.heat-cell.l2{background:rgba(79,70,229,0.5)}
+.heat-cell.l3{background:rgba(79,70,229,0.8)}
+.offline-strip{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.2);border-radius:var(--r12);font-size:12px;margin-bottom:14px;flex-wrap:wrap;gap:8px}
+.sync-dot{width:7px;height:7px;border-radius:50%;background:#10B981;animation:pulse 2s infinite;flex-shrink:0}
+
+/* ====== WORKSPACE ====== */
+.workspace{display:grid;grid-template-columns:220px 1fr 280px;min-height:calc(100vh - 55px);overflow:hidden}
+.ws-sidebar{background:var(--bg2);border-right:1px solid var(--border);padding:14px;overflow-y:auto;min-width:0}
+.ws-sidebar h4{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin:14px 0 6px;padding:0 4px}
+.tree-item{display:flex;align-items:center;gap:7px;padding:6px 8px;border-radius:var(--r8);font-size:12px;color:var(--text2);cursor:pointer;transition:all .2s}
+.tree-item:hover{background:var(--glass);color:var(--text)}
+.tree-item.active{background:rgba(79,70,229,0.15);color:var(--indigo-light)}
+.tree-item i{font-size:13px;flex-shrink:0}
+.keyword-tag{display:inline-block;padding:2px 7px;background:var(--glass2);border:1px solid var(--border);border-radius:99px;font-size:11px;color:var(--text2);margin:2px;cursor:pointer;transition:all .2s}
+.keyword-tag:hover{background:rgba(79,70,229,0.15);color:var(--indigo-light);border-color:rgba(79,70,229,0.4)}
+.ws-main{padding:18px;overflow-y:auto;background:var(--bg);min-width:0}
+.ws-ai{background:var(--bg2);border-left:1px solid var(--border);padding:14px;overflow-y:auto;min-width:0}
+.summary-card{background:var(--glass);border:1px solid var(--border);border-radius:var(--r16);margin-bottom:12px;overflow:hidden}
+.summary-header{padding:12px 14px;display:flex;align-items:center;justify-content:space-between;cursor:pointer}
+.summary-header h4{font-size:13px;font-weight:600;display:flex;align-items:center;gap:7px;margin:0}
+.summary-body{padding:0 14px 12px;font-size:12px;color:var(--text2);line-height:1.8;border-top:1px solid var(--border)}
+.key-point{display:flex;align-items:flex-start;gap:7px;margin-bottom:7px}
+.key-dot{width:5px;height:5px;border-radius:50%;background:var(--indigo-light);margin-top:7px;flex-shrink:0}
+.ai-btn{width:100%;padding:9px 12px;border-radius:var(--r8);font-size:12px;font-weight:500;cursor:pointer;margin-bottom:7px;text-align:left;display:flex;align-items:center;gap:7px;transition:all .2s;border:none;font-family:'Sora',sans-serif}
+.ai-btn-primary{background:var(--grad);color:#fff}
+.ai-btn-primary:hover{opacity:.9}
+.ai-btn-secondary{background:var(--glass2);color:var(--text2);border:1px solid var(--border)}
+.ai-btn-secondary:hover{background:var(--glass3);color:var(--text)}
+
+/* ====== FLASHCARDS ====== */
+.flashcard-page{padding:24px;max-width:860px;margin:0 auto}
+.fc-controls{display:flex;align-items:center;gap:8px;margin-bottom:20px;flex-wrap:wrap}
+.fc-filter{padding:6px 13px;background:var(--glass);border:1px solid var(--border);border-radius:var(--r8);font-size:12px;color:var(--text);cursor:pointer;transition:all .2s;font-family:'Sora',sans-serif}
+.fc-filter:hover,.fc-filter.active{background:rgba(79,70,229,0.15);border-color:rgba(79,70,229,0.4);color:var(--indigo-light)}
+.card-stack{position:relative;height:300px;margin-bottom:22px;perspective:1000px}
+.flashcard{width:100%;height:100%;position:relative;transform-style:preserve-3d;transition:transform .6s cubic-bezier(.4,0,.2,1);cursor:pointer}
+.flashcard.flipped{transform:rotateY(180deg)}
+.card-face{position:absolute;width:100%;height:100%;backface-visibility:hidden;border-radius:var(--r24);padding:36px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.card-front{background:linear-gradient(135deg,rgba(79,70,229,0.15),rgba(124,58,237,0.15));border:1px solid rgba(79,70,229,0.3)}
+.card-back{background:linear-gradient(135deg,rgba(37,99,235,0.15),rgba(79,70,229,0.15));border:1px solid rgba(37,99,235,0.3);transform:rotateY(180deg)}
+.card-label{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--text3);margin-bottom:14px}
+.card-content{font-size:18px;font-weight:600;line-height:1.4}
+.card-sub{font-size:13px;color:var(--text2);margin-top:10px}
+.card-tag{padding:4px 10px;border-radius:99px;font-size:11px;font-weight:500;margin-top:14px}
+.tag-easy{background:rgba(16,185,129,0.15);color:#10B981}
+.tag-med{background:rgba(251,191,36,0.15);color:#FBBF24}
+.tag-hard{background:rgba(239,68,68,0.15);color:#EF4444}
+.card-hint{font-size:11px;color:var(--text3);margin-top:auto;display:flex;align-items:center;gap:4px}
+.fc-nav{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.fc-nav-btns{display:flex;gap:7px}
+.icon-btn{width:40px;height:40px;border-radius:50%;background:var(--glass);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:17px;color:var(--text2);cursor:pointer;transition:all .2s}
+.icon-btn:hover{background:var(--glass2);color:var(--text)}
+.icon-btn.liked{color:#EC4899;border-color:rgba(236,72,153,0.4)}
+.mark-btns{display:flex;gap:7px;flex-wrap:wrap;justify-content:center}
+.mark-btn{padding:7px 16px;border-radius:var(--r8);font-size:12px;font-weight:500;cursor:pointer;transition:all .2s;border:none;font-family:'Sora',sans-serif}
+
+/* ====== QUIZ ====== */
+.quiz-page{padding:24px;max-width:780px;margin:0 auto}
+.quiz-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px}
+.quiz-timer{display:flex;align-items:center;gap:7px;padding:7px 14px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:99px;font-family:'Space Mono',monospace;font-size:15px;color:#EF4444}
+.quiz-prog{flex:1;max-width:280px}
+.quiz-prog-bar{height:7px;background:var(--glass2);border-radius:99px;overflow:hidden}
+.quiz-prog-fill{height:100%;background:var(--grad);border-radius:99px;transition:width .3s}
+.quiz-prog-label{font-size:11px;color:var(--text2);text-align:right;margin-top:3px}
+.diff-select{display:flex;gap:7px;margin-bottom:16px;flex-wrap:wrap}
+.diff-btn{padding:5px 13px;border-radius:99px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--border);background:var(--glass);color:var(--text2);transition:all .2s;font-family:'Sora',sans-serif}
+.diff-btn.active{border-color:var(--indigo);background:rgba(79,70,229,0.15);color:var(--indigo-light)}
+.question-card{background:var(--glass);border:1px solid var(--border);border-radius:var(--r16);padding:24px;margin-bottom:16px}
+.q-num{font-size:11px;color:var(--text3);margin-bottom:7px;text-transform:uppercase;letter-spacing:.08em}
+.q-text{font-size:16px;font-weight:600;line-height:1.5;margin-bottom:20px}
+.options{display:flex;flex-direction:column;gap:8px}
+.option{padding:12px 16px;border-radius:var(--r12);border:1px solid var(--border);background:var(--glass2);font-size:13px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:10px;color:var(--text2)}
+.option:hover{background:rgba(79,70,229,0.1);border-color:rgba(79,70,229,0.4);color:var(--text)}
+.option.selected{background:rgba(79,70,229,0.15);border-color:rgba(79,70,229,0.6);color:var(--indigo-light)}
+.option.correct{background:rgba(16,185,129,0.15);border-color:rgba(16,185,129,0.5);color:#10B981}
+.option.wrong{background:rgba(239,68,68,0.1);border-color:rgba(239,68,68,0.4);color:#EF4444}
+.option-letter{width:26px;height:26px;border-radius:50%;background:var(--glass3);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0}
+.feedback-bar{padding:10px 16px;border-radius:var(--r12);font-size:12px;font-weight:500;margin-top:10px;display:flex;align-items:center;gap:7px}
+.feedback-correct{background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3);color:#10B981}
+.feedback-wrong{background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:#EF4444}
+.score-card{background:var(--glass);border:1px solid var(--border);border-radius:var(--r24);padding:32px;text-align:center;margin-bottom:18px}
+.score-circle{width:110px;height:110px;border-radius:50%;background:var(--grad);display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto 18px}
+.score-num{font-size:30px;font-weight:700;line-height:1;color:#fff}
+.score-pct{font-size:12px;opacity:.8;color:#fff}
+.score-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:18px}
+.score-stat{background:var(--glass2);border-radius:var(--r12);padding:12px}
+
+/* Accessibility panel — inline not fixed */
+.a11y-wrap{position:relative;z-index:10;display:flex;justify-content:flex-end;padding:12px 20px 0}
+.a11y-panel{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+.a11y-toggle{width:40px;height:40px;border-radius:50%;background:var(--grad);border:none;color:#fff;font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.a11y-menu{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r16);padding:14px;width:210px;display:none;flex-direction:column;gap:8px}
+.a11y-menu.show{display:flex}
+.a11y-row{display:flex;align-items:center;justify-content:space-between;font-size:12px}
+.toggle-switch{width:34px;height:18px;background:var(--glass3);border-radius:99px;cursor:pointer;position:relative;border:none;transition:all .3s}
+.toggle-switch.on{background:var(--indigo)}
+.toggle-switch::after{content:'';position:absolute;width:12px;height:12px;border-radius:50%;background:#fff;top:3px;left:3px;transition:left .3s}
+.toggle-switch.on::after{left:19px}
+.loading-dots{display:inline-flex;gap:4px}
+.loading-dots span{width:5px;height:5px;border-radius:50%;background:var(--indigo-light);animation:pulse 1.2s infinite}
+.loading-dots span:nth-child(2){animation-delay:.2s}
+.loading-dots span:nth-child(3){animation-delay:.4s}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
+</style>
+
+<h2 class="sr-only">StudySphere AI — an AI-powered educational platform for PDF-based learning with flashcards, quizzes, and summaries</h2>
+
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="logo">
+    <div class="logo-icon"><i class="ti ti-planet" aria-hidden="true"></i></div>
+    <span>StudySphere AI</span>
+  </div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showPage('landing')">Home</button>
+    <button class="nav-tab" onclick="showPage('dashboard')">Dashboard</button>
+    <button class="nav-tab" onclick="showPage('workspace')">Workspace</button>
+    <button class="nav-tab" onclick="showPage('flashcards')">Flashcards</button>
+    <button class="nav-tab" onclick="showPage('quiz')">Quiz</button>
+  </div>
+  <div class="nav-right">
+    <button class="nav-btn" onclick="toggleTheme()" aria-label="Toggle theme"><i class="ti ti-sun"></i></button>
+    <div class="nav-avatar" aria-label="User profile">AS</div>
+  </div>
+</nav>
+
+<!-- ====== LANDING ====== -->
+<div class="page active" id="page-landing">
+  <div class="landing-wrap">
+    <div class="hero">
+      <div class="hero-badge"><i class="ti ti-sparkles" aria-hidden="true"></i> Powered by Claude AI</div>
+      <h1>Learn Smarter,<br>Not Harder <span class="grad">with AI</span></h1>
+      <p>Upload any PDF and instantly get summaries, flashcards, quizzes, and personalized study tools — all powered by AI.</p>
+      <div class="hero-btns">
+        <button class="btn-primary" onclick="showPage('dashboard')"><i class="ti ti-rocket" aria-hidden="true"></i> Start Learning Free</button>
+        <button class="btn-secondary" onclick="showPage('workspace')"><i class="ti ti-player-play" aria-hidden="true"></i> See Demo</button>
+      </div>
+    </div>
+
+    <div class="upload-zone" id="uploadZone" onclick="document.getElementById('pdfInput').click()" ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="handleDrop(event)" role="button" aria-label="Upload PDF files">
+      <input type="file" id="pdfInput" accept=".pdf" multiple onchange="handleFiles(this.files)" style="display:none">
+      <div class="upload-icon"><i class="ti ti-cloud-upload" aria-hidden="true"></i></div>
+      <h3>Drop your PDFs here</h3>
+      <p>or click to browse — supports scanned PDFs with OCR</p>
+      <div style="margin-top:14px;display:flex;gap:6px;justify-content:center;flex-wrap:wrap">
+        <span class="keyword-tag"><i class="ti ti-file-type-pdf" aria-hidden="true"></i> PDF</span>
+        <span class="keyword-tag"><i class="ti ti-eye" aria-hidden="true"></i> OCR</span>
+        <span class="keyword-tag"><i class="ti ti-files" aria-hidden="true"></i> Multi-file</span>
+        <span class="keyword-tag"><i class="ti ti-lock" aria-hidden="true"></i> Secure</span>
+      </div>
+    </div>
+
+    <div id="uploadList" style="display:flex;flex-direction:column;gap:8px;margin-bottom:40px"></div>
+
+    <div class="section-title">
+      <h2>Everything you need to <span class="grad">ace your exams</span></h2>
+      <p>AI-powered tools designed for how students actually learn</p>
+    </div>
+    <div class="feat-grid">
+      <div class="feat-card">
+        <div class="feat-icon" style="background:rgba(79,70,229,0.15);color:var(--indigo-light)"><i class="ti ti-brain" aria-hidden="true"></i></div>
+        <h3>AI Summarization</h3>
+        <p>Chapter-wise summaries, key points, and exam-focused notes generated instantly from your PDFs.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon" style="background:rgba(124,58,237,0.15);color:var(--purple-light)"><i class="ti ti-cards" aria-hidden="true"></i></div>
+        <h3>Smart Flashcards</h3>
+        <p>Spaced repetition flashcards with flip animations, difficulty tracking, and progress indicators.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon" style="background:rgba(37,99,235,0.15);color:var(--blue-light)"><i class="ti ti-trophy" aria-hidden="true"></i></div>
+        <h3>Adaptive Quizzes</h3>
+        <p>MCQ, True/False, and short answer quizzes with timers, analytics, and gamified scoring.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon" style="background:rgba(236,72,153,0.15);color:#F9A8D4"><i class="ti ti-search" aria-hidden="true"></i></div>
+        <h3>Smart Extraction</h3>
+        <p>Auto-detects chapters, headings, formulas, and keywords from complex academic documents.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon" style="background:rgba(16,185,129,0.15);color:#6EE7B7"><i class="ti ti-wifi-off" aria-hidden="true"></i></div>
+        <h3>Offline Mode</h3>
+        <p>Download flashcards and quizzes to study anywhere — even without an internet connection.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon" style="background:rgba(251,191,36,0.15);color:#FDE68A"><i class="ti ti-accessible" aria-hidden="true"></i></div>
+        <h3>Accessibility</h3>
+        <p>Dark/light mode, font size controls, text-to-speech, and dyslexia-friendly reading mode built in.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== DASHBOARD ====== -->
+<div class="page" id="page-dashboard">
+  <div class="dash">
+    <div class="dash-header">
+      <div>
+        <h1 style="font-size:22px;font-weight:700;margin-bottom:4px">Good evening, Arjun 👋</h1>
+        <p style="color:var(--text2);font-size:13px">You're on a 7-day streak — keep it up!</p>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <div class="streak-badge"><i class="ti ti-flame" aria-hidden="true"></i> 7 day streak</div>
+        <button class="btn-primary" onclick="showPage('workspace')" style="padding:9px 18px;font-size:12px"><i class="ti ti-plus" aria-hidden="true"></i> New Session</button>
+      </div>
+    </div>
+
+    <div class="offline-strip">
+      <div style="display:flex;align-items:center;gap:8px">
+        <div class="sync-dot" aria-hidden="true"></div>
+        <span>All data synced — <strong>12 flashcard decks</strong> available offline</span>
+      </div>
+      <button style="padding:5px 12px;border-radius:var(--r8);background:rgba(251,191,36,0.12);border:1px solid rgba(251,191,36,0.3);color:#FBBF24;font-size:11px;cursor:pointer;font-family:'Sora',sans-serif">Manage Storage</button>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-val" style="background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent">24</div>
+        <div class="stat-lbl">Documents</div><div class="stat-sub">+3 this week</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" style="color:#10B981">847</div>
+        <div class="stat-lbl">Cards Studied</div><div class="stat-sub">94% retention</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" style="color:#FBBF24">12</div>
+        <div class="stat-lbl">Quizzes Done</div><div class="stat-sub">Avg score: 78%</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" style="color:var(--purple-light)">42h</div>
+        <div class="stat-lbl">Study Time</div><div class="stat-sub">+8h this week</div>
+      </div>
+    </div>
+
+    <div class="dash-grid">
+      <div class="dash-main">
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title"><i class="ti ti-files" aria-hidden="true"></i> Recent Documents</div>
+            <span class="panel-action" onclick="showPage('workspace')">View all</span>
+          </div>
+          <div class="doc-list">
+            <div class="doc-card" onclick="showPage('workspace')">
+              <div class="doc-icon" style="background:rgba(239,68,68,0.15);color:#EF4444"><i class="ti ti-file-type-pdf" aria-hidden="true"></i></div>
+              <div class="doc-info">
+                <div class="doc-name">Organic Chemistry — Chapter 12.pdf</div>
+                <div class="doc-meta">4.2 MB · 2 hours ago</div>
+              </div>
+              <span class="doc-status status-ready">Ready</span>
+            </div>
+            <div class="doc-card" onclick="showPage('workspace')">
+              <div class="doc-icon" style="background:rgba(79,70,229,0.15);color:var(--indigo-light)"><i class="ti ti-file-type-pdf" aria-hidden="true"></i></div>
+              <div class="doc-info">
+                <div class="doc-name">Macroeconomics Lecture Notes.pdf</div>
+                <div class="doc-meta">1.8 MB · Yesterday</div>
+                <div class="prog-bar" style="max-width:180px"><div class="prog-fill" style="width:65%"></div></div>
+              </div>
+              <span class="doc-status status-proc">65%</span>
+            </div>
+            <div class="doc-card" onclick="showPage('workspace')">
+              <div class="doc-icon" style="background:rgba(16,185,129,0.15);color:#10B981"><i class="ti ti-file-type-pdf" aria-hidden="true"></i></div>
+              <div class="doc-info">
+                <div class="doc-name">Data Structures & Algorithms.pdf</div>
+                <div class="doc-meta">6.1 MB · 3 days ago</div>
+              </div>
+              <span class="doc-status status-ready">Ready</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title"><i class="ti ti-chart-bar" aria-hidden="true"></i> Quiz Performance</div>
+            <span style="font-size:11px;color:var(--text3)">Last 7 days</span>
+          </div>
+          <div class="mini-chart" id="miniChart" aria-label="Quiz scores bar chart"></div>
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3);margin-top:4px">
+            <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:18px">
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title"><i class="ti ti-calendar" aria-hidden="true"></i> Study Streak</div>
+            <span style="font-size:18px">🔥</span>
+          </div>
+          <div class="heatmap" id="heatmap" aria-label="Study activity heatmap"></div>
+          <p style="font-size:11px;color:var(--text3);margin-top:7px;text-align:center">4 weeks of activity</p>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header"><div class="panel-title"><i class="ti ti-cards" aria-hidden="true"></i> Flashcard Stats</div></div>
+          <div style="display:flex;flex-direction:column;gap:9px">
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px"><span>Chemistry</span><span style="color:var(--text2)">84%</span></div>
+              <div class="prog-bar"><div class="prog-fill" style="width:84%"></div></div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px"><span>Economics</span><span style="color:var(--text2)">62%</span></div>
+              <div class="prog-bar"><div class="prog-fill" style="width:62%;background:linear-gradient(135deg,#7C3AED,#EC4899)"></div></div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px"><span>Algorithms</span><span style="color:var(--text2)">91%</span></div>
+              <div class="prog-bar"><div class="prog-fill" style="width:91%;background:linear-gradient(135deg,#10B981,#059669)"></div></div>
+            </div>
+          </div>
+          <button class="ai-btn ai-btn-secondary" onclick="showPage('flashcards')" style="margin-top:12px"><i class="ti ti-arrow-right" aria-hidden="true"></i> Study Flashcards</button>
+        </div>
+
+        <div class="panel" style="background:linear-gradient(135deg,rgba(79,70,229,0.15),rgba(124,58,237,0.15));border-color:rgba(79,70,229,0.3)">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:7px">
+            <i class="ti ti-trophy" style="font-size:22px;color:#FBBF24" aria-hidden="true"></i>
+            <div><div style="font-size:13px;font-weight:600">Leaderboard</div><div style="font-size:11px;color:var(--text2)">Your rank this week</div></div>
+          </div>
+          <div style="font-size:34px;font-weight:700;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent">#4</div>
+          <div style="font-size:11px;color:var(--text2);margin-top:3px">Top 10% of your class</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== WORKSPACE ====== -->
+<div class="page" id="page-workspace">
+  <div class="workspace">
+    <aside class="ws-sidebar" aria-label="Document structure">
+      <div style="margin-bottom:10px">
+        <div style="font-size:13px;font-weight:600;margin-bottom:5px;display:flex;align-items:center;gap:7px"><i class="ti ti-file-type-pdf" style="color:#EF4444" aria-hidden="true"></i> Organic Chemistry</div>
+        <div style="font-size:10px;color:var(--text3)">4.2 MB · 284 pages · Ready</div>
+      </div>
+      <input type="text" placeholder="Search content…" style="width:100%;padding:6px 9px;background:var(--glass2);border:1px solid var(--border);border-radius:var(--r8);font-size:11px;color:var(--text);font-family:'Sora',sans-serif;margin-bottom:4px" aria-label="Search document">
+      <h4 style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin:12px 0 6px;padding:0 4px">Chapters</h4>
+      <div class="tree-item active"><i class="ti ti-chevron-down" aria-hidden="true"></i> Ch.1: Atomic Structure</div>
+      <div class="tree-item"><i class="ti ti-chevron-right" aria-hidden="true"></i> Ch.2: Bonding</div>
+      <div class="tree-item"><i class="ti ti-chevron-right" aria-hidden="true"></i> Ch.3: Alkanes</div>
+      <div class="tree-item"><i class="ti ti-chevron-right" aria-hidden="true"></i> Ch.4: Alkenes</div>
+      <div class="tree-item"><i class="ti ti-chevron-right" aria-hidden="true"></i> Ch.5: Aromatics</div>
+      <div class="tree-item"><i class="ti ti-chevron-right" aria-hidden="true"></i> Ch.6: Mechanisms</div>
+      <h4 style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin:12px 0 6px;padding:0 4px">Keywords</h4>
+      <div><span class="keyword-tag">Hybridization</span><span class="keyword-tag">Orbitals</span><span class="keyword-tag">Isomers</span><span class="keyword-tag">VSEPR</span><span class="keyword-tag">SN2</span><span class="keyword-tag">Nucleophile</span></div>
+      <h4 style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin:12px 0 6px;padding:0 4px">Formulas</h4>
+      <div style="background:var(--glass2);border:1px solid var(--border);border-radius:var(--r8);padding:9px;font-family:'Space Mono',monospace;font-size:11px;color:var(--indigo-light);line-height:2">CH₄ · C₂H₆ · C₆H₆<br>ΔG = ΔH – TΔS<br>pKa = –log Ka</div>
+    </aside>
+
+    <main class="ws-main" aria-label="Document content">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:8px">
+        <h2 style="font-size:17px;font-weight:700">Chapter 1: Atomic Structure</h2>
+        <div style="display:flex;gap:7px">
+          <button class="nav-btn" style="font-size:11px" aria-label="Read aloud"><i class="ti ti-volume" aria-hidden="true"></i> Read Aloud</button>
+          <button class="nav-btn" style="font-size:11px" aria-label="Export"><i class="ti ti-download" aria-hidden="true"></i> Export</button>
+        </div>
+      </div>
+
+      <div class="summary-card">
+        <div class="summary-header" onclick="toggleSummary(this)" role="button" aria-expanded="true">
+          <h4><i class="ti ti-bolt" style="color:#FBBF24" aria-hidden="true"></i> Chapter Summary</h4>
+          <i class="ti ti-chevron-down" aria-hidden="true"></i>
+        </div>
+        <div class="summary-body" style="padding-top:12px">
+          <p style="margin-bottom:10px;line-height:1.8;font-size:12px">Atomic structure describes matter at the subatomic level. Atoms consist of protons and neutrons in a dense nucleus, surrounded by electrons in quantized energy levels called orbitals.</p>
+          <div>
+            <div class="key-point"><div class="key-dot"></div><span>Electrons occupy orbitals defined by four quantum numbers (n, l, mₗ, mₛ)</span></div>
+            <div class="key-point"><div class="key-dot"></div><span>Aufbau principle: electrons fill lowest energy orbitals first</span></div>
+            <div class="key-point"><div class="key-dot"></div><span>Hund's rule: electrons occupy degenerate orbitals singly before pairing</span></div>
+            <div class="key-point"><div class="key-dot"></div><span>Pauli exclusion: no two electrons have identical quantum numbers</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="summary-card">
+        <div class="summary-header" onclick="toggleSummary(this)" role="button" aria-expanded="false">
+          <h4><i class="ti ti-notebook" style="color:var(--indigo-light)" aria-hidden="true"></i> Exam-Focused Notes</h4>
+          <i class="ti ti-chevron-right" aria-hidden="true"></i>
+        </div>
+      </div>
+
+      <div class="summary-card">
+        <div class="summary-header" onclick="toggleSummary(this)" role="button" aria-expanded="false">
+          <h4><i class="ti ti-list-check" style="color:#10B981" aria-hidden="true"></i> Quick Revision Points</h4>
+          <i class="ti ti-chevron-right" aria-hidden="true"></i>
+        </div>
+      </div>
+
+      <div style="background:var(--glass);border:1px solid var(--border);border-radius:var(--r16);padding:18px;margin-top:6px">
+        <div style="font-size:13px;font-weight:600;margin-bottom:10px;display:flex;align-items:center;gap:7px"><i class="ti ti-table" aria-hidden="true"></i> Quantum Numbers Table</div>
+        <div style="overflow-x:auto">
+          <table style="width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed">
+            <thead><tr style="background:rgba(79,70,229,0.1)">
+              <th style="padding:7px 10px;text-align:left;border-bottom:1px solid var(--border);font-weight:500">Name</th>
+              <th style="padding:7px 10px;text-align:left;border-bottom:1px solid var(--border);font-weight:500">Symbol</th>
+              <th style="padding:7px 10px;text-align:left;border-bottom:1px solid var(--border);font-weight:500">Values</th>
+              <th style="padding:7px 10px;text-align:left;border-bottom:1px solid var(--border);font-weight:500">Describes</th>
+            </tr></thead>
+            <tbody>
+              <tr><td style="padding:7px 10px;border-bottom:1px solid var(--border);color:var(--text2)">Principal</td><td style="padding:7px 10px;border-bottom:1px solid var(--border);font-family:'Space Mono',monospace;color:var(--indigo-light)">n</td><td style="padding:7px 10px;border-bottom:1px solid var(--border);color:var(--text2)">1, 2, 3…</td><td style="padding:7px 10px;border-bottom:1px solid var(--border);color:var(--text2)">Energy level</td></tr>
+              <tr><td style="padding:7px 10px;border-bottom:1px solid var(--border);color:var(--text2)">Angular</td><td style="padding:7px 10px;border-bottom:1px solid var(--border);font-family:'Space Mono',monospace;color:var(--indigo-light)">l</td><td style="padding:7px 10px;border-bottom:1px solid var(--border);color:var(--text2)">0 to n–1</td><td style="padding:7px 10px;border-bottom:1px solid var(--border);color:var(--text2)">Orbital shape</td></tr>
+              <tr><td style="padding:7px 10px;color:var(--text2)">Spin</td><td style="padding:7px 10px;font-family:'Space Mono',monospace;color:var(--indigo-light)">mₛ</td><td style="padding:7px 10px;color:var(--text2)">+½, –½</td><td style="padding:7px 10px;color:var(--text2)">Electron spin</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+
+    <aside class="ws-ai" aria-label="AI tools">
+      <div style="font-size:13px;font-weight:600;margin-bottom:14px;display:flex;align-items:center;gap:7px"><i class="ti ti-sparkles" style="color:var(--indigo-light)" aria-hidden="true"></i> AI Tools</div>
+      <button class="ai-btn ai-btn-primary" onclick="simulateGenerate(this)"><i class="ti ti-wand" aria-hidden="true"></i> Generate Summary</button>
+      <button class="ai-btn ai-btn-secondary"><i class="ti ti-arrows-down-up" aria-hidden="true"></i> Simpler Explanation</button>
+      <button class="ai-btn ai-btn-secondary"><i class="ti ti-zoom-in" aria-hidden="true"></i> Expand Detail</button>
+      <div style="height:1px;background:var(--border);margin:14px 0"></div>
+      <button class="ai-btn ai-btn-secondary" onclick="showPage('flashcards')"><i class="ti ti-cards" aria-hidden="true"></i> Generate Flashcards</button>
+      <button class="ai-btn ai-btn-secondary" onclick="showPage('quiz')"><i class="ti ti-help-circle" aria-hidden="true"></i> Create Quiz</button>
+      <div style="height:1px;background:var(--border);margin:14px 0"></div>
+      <div style="font-size:10px;color:var(--text3);margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em">Generation Progress</div>
+      <div style="font-size:12px;margin-bottom:5px;display:flex;justify-content:space-between"><span>Summary</span><span style="color:#10B981">Done</span></div>
+      <div class="prog-bar" style="margin-bottom:10px"><div class="prog-fill" style="width:100%;background:linear-gradient(135deg,#10B981,#059669)"></div></div>
+      <div style="font-size:12px;margin-bottom:5px;display:flex;justify-content:space-between"><span>Flashcards</span><span style="color:var(--indigo-light)">18/24</span></div>
+      <div class="prog-bar" style="margin-bottom:10px"><div class="prog-fill" style="width:75%"></div></div>
+      <div style="font-size:12px;margin-bottom:5px;display:flex;justify-content:space-between"><span>Quiz</span><span style="color:var(--text3)">Pending</span></div>
+      <div class="prog-bar" style="margin-bottom:14px"><div class="prog-fill" style="width:0%"></div></div>
+      <div style="background:rgba(79,70,229,0.08);border:1px solid rgba(79,70,229,0.2);border-radius:var(--r12);padding:10px">
+        <div style="font-size:10px;color:var(--text3);margin-bottom:5px">AI Insight</div>
+        <p style="font-size:12px;color:var(--text2);line-height:1.6">Hybridization concepts appear in ~40% of exam questions — prioritize this topic.</p>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<!-- ====== FLASHCARDS ====== -->
+<div class="page" id="page-flashcards">
+  <div class="flashcard-page">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px">
+      <div>
+        <h2 style="font-size:20px;font-weight:700">Flashcard Study</h2>
+        <p style="font-size:12px;color:var(--text2);margin-top:3px">Organic Chemistry — Chapter 1</p>
+      </div>
+      <div style="display:flex;gap:7px">
+        <button class="icon-btn" id="shuffleBtn" onclick="toggleShuffle()" aria-label="Shuffle cards"><i class="ti ti-arrows-shuffle" aria-hidden="true"></i></button>
+        <button class="icon-btn" id="likeBtn" onclick="toggleLike()" aria-label="Favorite card"><i class="ti ti-heart" aria-hidden="true"></i></button>
+      </div>
+    </div>
+
+    <div class="fc-controls" role="group" aria-label="Topic filters">
+      <button class="fc-filter active" onclick="filterFC(this)">All</button>
+      <button class="fc-filter" onclick="filterFC(this)">Definitions</button>
+      <button class="fc-filter" onclick="filterFC(this)">Formulas</button>
+      <button class="fc-filter" onclick="filterFC(this)">Fill-in</button>
+      <button class="fc-filter" onclick="filterFC(this)">Difficult</button>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;font-size:13px;color:var(--text2)">
+      <span><strong id="fcCurrent" style="color:var(--text)">1</strong> / <span id="fcTotal">5</span> cards</span>
+      <span style="margin-left:auto;font-size:11px;color:var(--text3)">Click card to flip</span>
+    </div>
+    <div class="prog-bar" style="margin-bottom:18px"><div class="prog-fill" id="fcProgBar" style="width:20%"></div></div>
+
+    <div class="card-stack" role="region" aria-label="Flashcard">
+      <div style="position:absolute;width:96%;height:100%;background:var(--glass);border:1px solid var(--border);border-radius:var(--r24);top:10px;left:2%;z-index:0"></div>
+      <div style="position:absolute;width:98%;height:100%;background:var(--glass2);border:1px solid var(--border);border-radius:var(--r24);top:5px;left:1%;z-index:1"></div>
+      <div class="flashcard" id="flashcard" onclick="flipCard()" style="z-index:2" role="button" aria-label="Flip flashcard" tabindex="0">
+        <div class="card-face card-front">
+          <div class="card-label">Definition</div>
+          <div class="card-content" id="cardFront">What is Hybridization in organic chemistry?</div>
+          <div class="card-hint"><i class="ti ti-rotate-clockwise" aria-hidden="true"></i> Tap to reveal answer</div>
+          <span class="card-tag tag-med">Medium</span>
+        </div>
+        <div class="card-face card-back">
+          <div class="card-label">Answer</div>
+          <div class="card-content" id="cardBack" style="font-size:15px">The mixing of atomic orbitals of similar energy to form new hybrid orbitals (sp, sp², sp³) used in bonding.</div>
+          <div class="card-sub">Example: Carbon in methane (CH₄) is sp³ hybridized</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="fc-nav">
+      <div class="fc-nav-btns">
+        <button class="icon-btn" onclick="prevCard()" aria-label="Previous card"><i class="ti ti-arrow-left" aria-hidden="true"></i></button>
+        <button class="icon-btn" onclick="nextCard()" aria-label="Next card"><i class="ti ti-arrow-right" aria-hidden="true"></i></button>
+      </div>
+      <div class="mark-btns" role="group" aria-label="Mark difficulty">
+        <button class="mark-btn" style="background:rgba(239,68,68,0.15);color:#EF4444;border:1px solid rgba(239,68,68,0.3)" onclick="markCard('hard')">Hard</button>
+        <button class="mark-btn" style="background:rgba(251,191,36,0.15);color:#FBBF24;border:1px solid rgba(251,191,36,0.3)" onclick="markCard('ok')">Ok</button>
+        <button class="mark-btn" style="background:rgba(16,185,129,0.15);color:#10B981;border:1px solid rgba(16,185,129,0.3)" onclick="markCard('easy')">Easy</button>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:20px">
+      <div class="stat-card" style="text-align:center"><div class="stat-val" style="color:#EF4444;font-size:20px" id="hardCount">3</div><div class="stat-lbl">Hard</div></div>
+      <div class="stat-card" style="text-align:center"><div class="stat-val" style="color:#FBBF24;font-size:20px" id="okCount">8</div><div class="stat-lbl">Ok</div></div>
+      <div class="stat-card" style="text-align:center"><div class="stat-val" style="color:#10B981;font-size:20px" id="easyCount">13</div><div class="stat-lbl">Easy</div></div>
+    </div>
+
+    <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">
+      <button class="ai-btn ai-btn-secondary" style="flex:1"><i class="ti ti-download" aria-hidden="true"></i> Download Offline</button>
+      <button class="ai-btn ai-btn-primary" style="flex:1" onclick="showPage('quiz')"><i class="ti ti-arrow-right" aria-hidden="true"></i> Take Quiz</button>
+    </div>
+  </div>
+</div>
+
+<!-- ====== QUIZ ====== -->
+<div class="page" id="page-quiz">
+  <div class="quiz-page">
+    <div id="quizSetup">
+      <h2 style="font-size:20px;font-weight:700;margin-bottom:5px">AI Quiz Generator</h2>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:18px">Organic Chemistry — Chapter 1: Atomic Structure</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px">
+        <div style="flex:1;min-width:130px">
+          <div style="font-size:11px;color:var(--text3);margin-bottom:7px;text-transform:uppercase;letter-spacing:.06em">Question Types</div>
+          <div style="display:flex;flex-direction:column;gap:7px">
+            <label style="display:flex;align-items:center;gap:7px;font-size:12px;cursor:pointer"><input type="checkbox" checked> Multiple Choice</label>
+            <label style="display:flex;align-items:center;gap:7px;font-size:12px;cursor:pointer"><input type="checkbox" checked> True / False</label>
+            <label style="display:flex;align-items:center;gap:7px;font-size:12px;cursor:pointer"><input type="checkbox"> Short Answer</label>
+          </div>
+        </div>
+        <div style="flex:1;min-width:130px">
+          <div style="font-size:11px;color:var(--text3);margin-bottom:7px;text-transform:uppercase;letter-spacing:.06em">Difficulty</div>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <button class="diff-btn" onclick="selectDiff(this)" aria-pressed="false">Easy</button>
+            <button class="diff-btn active" onclick="selectDiff(this)" aria-pressed="true">Medium</button>
+            <button class="diff-btn" onclick="selectDiff(this)" aria-pressed="false">Hard</button>
+          </div>
+        </div>
+        <div style="flex:1;min-width:130px">
+          <div style="font-size:11px;color:var(--text3);margin-bottom:7px;text-transform:uppercase;letter-spacing:.06em">Timer</div>
+          <select style="width:100%;padding:7px;background:var(--glass2);border:1px solid var(--border);border-radius:var(--r8);color:var(--text);font-size:12px;font-family:'Sora',sans-serif" aria-label="Select timer">
+            <option>No timer</option>
+            <option selected>10 minutes</option>
+            <option>20 minutes</option>
+            <option>30 minutes</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn-primary" onclick="startQuiz()" style="width:100%;justify-content:center"><i class="ti ti-player-play" aria-hidden="true"></i> Start Quiz (10 questions)</button>
+    </div>
+
+    <div id="quizActive" style="display:none">
+      <div class="quiz-header">
+        <div class="quiz-timer" aria-live="polite"><i class="ti ti-clock" aria-hidden="true"></i> <span id="timerDisplay">9:47</span></div>
+        <div class="quiz-prog">
+          <div class="quiz-prog-bar"><div class="quiz-prog-fill" id="qProgFill" style="width:20%"></div></div>
+          <div class="quiz-prog-label">Question <span id="qNum">2</span> of 10</div>
+        </div>
+        <button class="nav-btn" style="font-size:11px" onclick="endQuiz()">End Quiz</button>
+      </div>
+      <div class="question-card">
+        <div class="q-num">Question 2 of 10 · Multiple Choice</div>
+        <div class="q-text">According to Hund's rule, how do electrons fill degenerate orbitals?</div>
+        <div class="options" role="group" aria-label="Answer options">
+          <div class="option" onclick="selectOption(this,'A')" role="button" tabindex="0"><div class="option-letter">A</div> They pair up immediately in the lowest energy orbital</div>
+          <div class="option" onclick="selectOption(this,'B')" role="button" tabindex="0"><div class="option-letter">B</div> They occupy orbitals singly with parallel spins before pairing</div>
+          <div class="option" onclick="selectOption(this,'C')" role="button" tabindex="0"><div class="option-letter">C</div> They fill highest energy orbitals first</div>
+          <div class="option" onclick="selectOption(this,'D')" role="button" tabindex="0"><div class="option-letter">D</div> Electron placement is completely random</div>
+        </div>
+        <div id="feedback" style="display:none"></div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn-secondary" style="flex:1" onclick="endQuiz()"><i class="ti ti-forward-skip" aria-hidden="true"></i> Skip</button>
+        <button class="btn-primary" style="flex:1" onclick="nextQuestion()">Next <i class="ti ti-arrow-right" aria-hidden="true"></i></button>
+      </div>
+    </div>
+
+    <div id="quizResults" style="display:none">
+      <div class="score-card">
+        <div class="score-circle"><div class="score-num">78%</div><div class="score-pct">Score</div></div>
+        <h3 style="font-size:18px;font-weight:700;margin-bottom:7px">Good Job!</h3>
+        <p style="color:var(--text2);font-size:13px">You answered 7 out of 10 questions correctly</p>
+        <div class="score-stats">
+          <div class="score-stat"><div style="font-size:18px;font-weight:700;color:#10B981">7</div><div style="font-size:11px;color:var(--text2)">Correct</div></div>
+          <div class="score-stat"><div style="font-size:18px;font-weight:700;color:#EF4444">3</div><div style="font-size:11px;color:var(--text2)">Wrong</div></div>
+          <div class="score-stat"><div style="font-size:18px;font-weight:700;color:#FBBF24">6:32</div><div style="font-size:11px;color:var(--text2)">Time Used</div></div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+        <div class="panel" style="text-align:center">
+          <div style="font-size:11px;color:var(--text3);margin-bottom:3px">Class Average</div>
+          <div style="font-size:22px;font-weight:700;color:var(--indigo-light)">71%</div>
+          <div style="font-size:11px;color:#10B981;margin-top:2px">↑ 7% above average</div>
+        </div>
+        <div class="panel" style="text-align:center">
+          <div style="font-size:11px;color:var(--text3);margin-bottom:3px">Your Best Score</div>
+          <div style="font-size:22px;font-weight:700;color:#FBBF24">85%</div>
+          <div style="font-size:11px;color:var(--text2);margin-top:2px">Last attempt</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn-secondary" style="flex:1" onclick="showPage('quiz')"><i class="ti ti-refresh" aria-hidden="true"></i> Retry Quiz</button>
+        <button class="btn-primary" style="flex:1" onclick="showPage('flashcards')"><i class="ti ti-cards" aria-hidden="true"></i> Study Weak Areas</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Accessibility — inline at bottom of each visible page -->
+<div class="a11y-wrap">
+  <div class="a11y-panel">
+    <div class="a11y-menu" id="a11yMenu" role="dialog" aria-label="Accessibility settings">
+      <div style="font-size:12px;font-weight:600;margin-bottom:7px">Accessibility</div>
+      <div class="a11y-row"><span>High Contrast</span><button class="toggle-switch" onclick="toggleSwitch(this)" aria-label="Toggle high contrast"></button></div>
+      <div class="a11y-row"><span>Dyslexia Font</span><button class="toggle-switch" onclick="toggleSwitch(this)" aria-label="Toggle dyslexia font"></button></div>
+      <div class="a11y-row"><span>Text to Speech</span><button class="toggle-switch" onclick="toggleSwitch(this)" aria-label="Toggle TTS"></button></div>
+      <div class="a11y-row"><span>Large Text</span><button class="toggle-switch" onclick="toggleSwitch(this)" aria-label="Toggle large text"></button></div>
+      <div style="margin-top:4px">
+        <div style="font-size:10px;color:var(--text3);margin-bottom:5px">Font Size</div>
+        <input type="range" min="12" max="22" value="16" step="1" style="width:100%" aria-label="Font size" oninput="document.body.style.fontSize=this.value+'px'">
+      </div>
+    </div>
+    <button class="a11y-toggle" onclick="toggleA11y()" aria-label="Toggle accessibility panel"><i class="ti ti-accessible" aria-hidden="true"></i></button>
+  </div>
+</div>
+
+<script>
+const cards=[
+  {q:"What is Hybridization in organic chemistry?",a:"The mixing of atomic orbitals to form new hybrid orbitals (sp, sp², sp³) used in bonding.",sub:"Carbon in methane (CH₄) is sp³ hybridized",diff:"med"},
+  {q:"State the Pauli Exclusion Principle.",a:"No two electrons in the same atom can have an identical set of four quantum numbers.",sub:"Each orbital holds a maximum of 2 electrons",diff:"easy"},
+  {q:"What does the principal quantum number (n) describe?",a:"The energy level or shell of an electron, determining its distance from the nucleus.",sub:"Higher n = higher energy = further from nucleus",diff:"easy"},
+  {q:"Define electronegativity.",a:"The tendency of an atom to attract electrons toward itself in a chemical bond.",sub:"Fluorine is most electronegative on the Pauling scale",diff:"med"},
+  {q:"What is an SN2 reaction?",a:"A bimolecular nucleophilic substitution — the nucleophile attacks as the leaving group departs simultaneously.",sub:"Rate depends on both nucleophile and substrate concentration",diff:"hard"},
+];
+let ci=0,flipped=false,liked=false,shuffled=false,hard=3,ok=8,easy=13;
+let cardData=[...cards];
+
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  const tabs=['landing','dashboard','workspace','flashcards','quiz'];
+  const idx=tabs.indexOf(id);
+  if(idx>=0)document.querySelectorAll('.nav-tab')[idx].classList.add('active');
+  window.scrollTo(0,0);
+}
+function dragOver(e){e.preventDefault();document.getElementById('uploadZone').classList.add('drag')}
+function dragLeave(){document.getElementById('uploadZone').classList.remove('drag')}
+function handleDrop(e){e.preventDefault();dragLeave();handleFiles(e.dataTransfer.files)}
+function handleFiles(files){
+  const list=document.getElementById('uploadList');
+  Array.from(files).forEach(f=>{
+    const div=document.createElement('div');
+    div.className='doc-card';
+    div.innerHTML=`<div class="doc-icon" style="background:rgba(239,68,68,0.15);color:#EF4444"><i class="ti ti-file-type-pdf"></i></div><div class="doc-info"><div class="doc-name">${f.name}</div><div class="doc-meta">${(f.size/1024/1024).toFixed(1)} MB · Now</div><div class="prog-bar" style="max-width:180px"><div class="prog-fill" id="p${Date.now()}" style="width:0%"></div></div></div><div class="loading-dots"><span></span><span></span><span></span></div>`;
+    list.prepend(div);
+    const bar=div.querySelector('.prog-fill');
+    let w=0;
+    const t=setInterval(()=>{w+=Math.random()*15;if(w>=100){w=100;clearInterval(t);div.querySelector('.loading-dots').outerHTML='<span class="doc-status status-ready">Ready</span>'}bar.style.width=Math.min(w,100)+'%'},300);
+  });
+}
+function toggleSummary(el){
+  const body=el.nextElementSibling;
+  const icon=el.querySelector('i:last-child');
+  if(body&&body.classList.contains('summary-body')){
+    const vis=body.style.display!=='none'&&body.style.display!=='';
+    body.style.display=vis?'none':'block';
+    icon.className=vis?'ti ti-chevron-right':'ti ti-chevron-down';
+    el.setAttribute('aria-expanded',String(!vis));
+  }
+}
+function simulateGenerate(btn){
+  btn.innerHTML='<div class="loading-dots"><span></span><span></span><span></span></div> Generating…';
+  btn.disabled=true;
+  setTimeout(()=>{btn.innerHTML='<i class="ti ti-check"></i> Summary Ready!';setTimeout(()=>{btn.innerHTML='<i class="ti ti-wand"></i> Generate Summary';btn.disabled=false},2000)},2500);
+}
+function flipCard(){flipped=!flipped;document.getElementById('flashcard').classList.toggle('flipped',flipped)}
+function updateCard(){
+  const c=cardData[ci%cardData.length];
+  document.getElementById('cardFront').textContent=c.q;
+  document.getElementById('cardBack').textContent=c.a;
+  const total=cardData.length;
+  document.getElementById('fcCurrent').textContent=ci+1;
+  document.getElementById('fcTotal').textContent=total;
+  document.getElementById('fcProgBar').style.width=Math.round((ci+1)/total*100)+'%';
+  if(flipped)flipCard();
+}
+function nextCard(){ci=(ci+1)%cardData.length;updateCard()}
+function prevCard(){ci=(ci-1+cardData.length)%cardData.length;updateCard()}
+function toggleLike(){liked=!liked;document.getElementById('likeBtn').classList.toggle('liked',liked)}
+function toggleShuffle(){
+  shuffled=!shuffled;
+  document.getElementById('shuffleBtn').style.color=shuffled?'var(--indigo-light)':'';
+  cardData=shuffled?[...cards].sort(()=>Math.random()-.5):[...cards];
+  ci=0;updateCard();
+}
+function filterFC(btn){document.querySelectorAll('.fc-filter').forEach(b=>b.classList.remove('active'));btn.classList.add('active')}
+function markCard(type){
+  if(type==='hard')hard++;else if(type==='ok')ok++;else easy++;
+  document.getElementById('hardCount').textContent=hard;
+  document.getElementById('okCount').textContent=ok;
+  document.getElementById('easyCount').textContent=easy;
+  nextCard();
+}
+function selectDiff(btn){
+  document.querySelectorAll('.diff-btn').forEach(b=>{b.classList.remove('active');b.setAttribute('aria-pressed','false')});
+  btn.classList.add('active');btn.setAttribute('aria-pressed','true');
+}
+let timerInterval;
+function startQuiz(){
+  document.getElementById('quizSetup').style.display='none';
+  document.getElementById('quizActive').style.display='block';
+  let secs=587;
+  timerInterval=setInterval(()=>{
+    secs--;
+    if(secs<=0){clearInterval(timerInterval);endQuiz();return}
+    const m=Math.floor(secs/60),s=secs%60;
+    document.getElementById('timerDisplay').textContent=m+':'+(s<10?'0':'')+s;
+  },1000);
+}
+let selectedOpt=null,answered=false;
+function selectOption(el,letter){
+  if(answered)return;
+  document.querySelectorAll('.option').forEach(o=>o.classList.remove('selected'));
+  el.classList.add('selected');selectedOpt=letter;
+}
+function nextQuestion(){
+  if(!selectedOpt)return;
+  answered=true;
+  const correct='B';
+  document.querySelectorAll('.option').forEach(o=>{
+    const l=o.querySelector('.option-letter').textContent;
+    if(l===correct)o.classList.add('correct');
+    else if(l===selectedOpt&&selectedOpt!==correct)o.classList.add('wrong');
+  });
+  const fb=document.getElementById('feedback');
+  fb.style.display='flex';
+  fb.className='feedback-bar '+(selectedOpt===correct?'feedback-correct':'feedback-wrong');
+  fb.innerHTML=selectedOpt===correct?'<i class="ti ti-check"></i> Correct! Electrons fill orbitals singly with parallel spins before pairing.':'<i class="ti ti-x"></i> Incorrect. Answer B: electrons occupy orbitals singly first.';
+  setTimeout(()=>{answered=false;selectedOpt=null;endQuiz()},2500);
+}
+function endQuiz(){clearInterval(timerInterval);document.getElementById('quizActive').style.display='none';document.getElementById('quizResults').style.display='block'}
+function toggleA11y(){
+  const m=document.getElementById('a11yMenu');
+  m.classList.toggle('show');
+}
+function toggleSwitch(el){el.classList.toggle('on')}
+function toggleTheme(){document.body.classList.toggle('light-mode')}
+
+const bars=[65,80,45,90,78,55,88];
+const chart=document.getElementById('miniChart');
+bars.forEach((h,i)=>{
+  const b=document.createElement('div');
+  b.className='bar'+(i===6?' active':'');
+  b.style.height=h+'%';
+  b.setAttribute('aria-label','Day '+(i+1)+': '+h+'%');
+  chart.appendChild(b);
+});
+const hm=document.getElementById('heatmap');
+const levels=['','l1','l2','l3','l2','l1','l3','l2','','l1','l3','l2','l1','','l2','l3','l1','l2','l3','','l1','l2','l3','l2','l1','','l3','l2'];
+for(let i=0;i<28;i++){const c=document.createElement('div');c.className='heat-cell '+(levels[i]||'');c.setAttribute('aria-hidden','true');hm.appendChild(c)}
+</script>
