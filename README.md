@@ -131,7 +131,3 @@ StudyBuddy utilizes a modern, signal-based Angular frontend communicating with a
 ## 🤝 Contributing
 
 Contributions, issues, and feature requests are welcome! Feel free to check the [issues page](https://github.com/your-username/AI-StudyBuddy/issues).
-
-## 📄 License
-
-This project is licensed under the MIT License.
