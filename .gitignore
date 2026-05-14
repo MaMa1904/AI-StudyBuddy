@@ -34,3 +34,8 @@ npm-debug.log*
 # ── Misc ──
 *.tgz
 coverage/
+
+# -- Additional --
+Improvement.txt
+AGENT_CONTEXT.md
+studysphere_ai_v2.html
