@@ -36,6 +36,6 @@ export const config = {
 
   upload: {
     maxFileSizeBytes: parseInt(optional('MAX_FILE_SIZE_BYTES', String(20 * 1024 * 1024)), 10),
-    dir: optional('UPLOAD_DIR', './uploads'),
+    dir: optional('UPLOAD_DIR', process.env.NODE_ENV === 'production' ? '/tmp/uploads' : './uploads'),
   },
 } as const;
