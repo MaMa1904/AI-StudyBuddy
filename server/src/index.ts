@@ -56,16 +56,10 @@ const limiter = rateLimit({
 });
 
 // ── Routes ────────────────────────────────────────────────────
-// On Vercel, the vercel.json routes strip "/api" before forwarding to this file,
-// so Express receives paths like "/health", "/process-pdf", etc.
-// Locally, the frontend calls "/api/health", so we mount on "/api".
-if (config.isVercel) {
-  app.use('/', limiter);
-  app.use('/', aiRoutes);
-} else {
-  app.use('/api', limiter);
-  app.use('/api', aiRoutes);
-}
+// Vercel passes the full original path (e.g. /api/health) to Express,
+// so we always mount on /api — same as local development.
+app.use('/api', limiter);
+app.use('/api', aiRoutes);
 
 // ── 404 handler ───────────────────────────────────────────────
 app.use((_req: express.Request, res: express.Response) => {
