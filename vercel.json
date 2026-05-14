@@ -3,7 +3,7 @@
     "builds": [
         {
             "src": "studybuddy/package.json",
-            "use": "@vercel/stack-build",
+            "use": "@vercel/static-build",
             "config": {
                 "distDir": "dist/studybuddy/browser"
             }
