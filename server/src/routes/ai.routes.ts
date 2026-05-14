@@ -27,8 +27,14 @@ interface DocEntry {
 const docTextStore = new Map<string, DocEntry>();
 
 // ── Disk cache directory for surviving restarts ───────────────
-const cacheDir = path.resolve(config.upload.dir, '..', 'doc_cache');
-if (!fs.existsSync(cacheDir)) fs.mkdirSync(cacheDir, { recursive: true });
+const cacheDir = config.isVercel
+  ? '/tmp/doc_cache'
+  : path.resolve(config.upload.dir, '..', 'doc_cache');
+try {
+  if (!fs.existsSync(cacheDir)) fs.mkdirSync(cacheDir, { recursive: true });
+} catch (err) {
+  console.warn('[cache] Could not create cache dir (read-only fs?):', err);
+}
 
 function cacheToDisK(docId: string, entry: Omit<DocEntry, 'timer'>) {
   try {
@@ -86,7 +92,11 @@ function getDoc(docId: string): Omit<DocEntry, 'timer'> | null {
 
 // ── Multer config ─────────────────────────────────────────────
 const uploadDir = path.resolve(config.upload.dir);
-if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+try {
+  if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+} catch (err) {
+  console.warn('[upload] Could not create upload dir (read-only fs?):', err);
+}
 
 const storage = multer.memoryStorage(); // keep in memory, don't write to disk
 const upload = multer({

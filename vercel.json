@@ -19,8 +19,12 @@
             "dest": "server/src/index.ts"
         },
         {
-            "src": "/(.*)",
+            "src": "/(.*\\.[a-zA-Z0-9]+)$",
             "dest": "studybuddy/$1"
+        },
+        {
+            "src": "/(.*)",
+            "dest": "studybuddy/index.html"
         }
     ]
 }

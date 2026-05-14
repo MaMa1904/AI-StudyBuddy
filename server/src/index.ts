@@ -37,7 +37,7 @@ app.use(helmet({
 
 // ── CORS — allow Angular dev server and Vercel ─────────────────────
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production' ? '*' : config.allowedOrigin,
+  origin: config.nodeEnv === 'production' ? '*' : config.allowedOrigin,
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
@@ -54,10 +54,18 @@ const limiter = rateLimit({
   legacyHeaders: false,
   message: { error: 'Too many requests. Please wait a moment before trying again.' },
 });
-app.use('/api', limiter);
 
 // ── Routes ────────────────────────────────────────────────────
-app.use('/api', aiRoutes);
+// On Vercel, the vercel.json routes strip "/api" before forwarding to this file,
+// so Express receives paths like "/health", "/process-pdf", etc.
+// Locally, the frontend calls "/api/health", so we mount on "/api".
+if (config.isVercel) {
+  app.use('/', limiter);
+  app.use('/', aiRoutes);
+} else {
+  app.use('/api', limiter);
+  app.use('/api', aiRoutes);
+}
 
 // ── 404 handler ───────────────────────────────────────────────
 app.use((_req: express.Request, res: express.Response) => {
@@ -76,7 +84,7 @@ app.use((err: any, _req: express.Request, res: express.Response, _next: express.
 });
 
 // ── Start (Only local development) ────────────────────────────
-if (process.env.NODE_ENV !== 'production') {
+if (!config.isVercel) {
   const server = app.listen(config.port, () => {
     console.log('\n🚀 StudyBuddy Server running');
     console.log(`   ➜  Local:  http://localhost:${config.port}`);
