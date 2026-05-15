@@ -20,12 +20,13 @@ export class NavbarComponent {
   showAuthModal  = signal(false);
   showUserMenu   = signal(false);
 
-  navLinks = [
-    { path: '/',           label: 'Home',       icon: 'ti-home' },
-    { path: '/dashboard',  label: 'Dashboard',  icon: 'ti-layout-dashboard' },
-    { path: '/workspace',  label: 'Workspace',  icon: 'ti-file-text' },
-    { path: '/flashcards', label: 'Flashcards', icon: 'ti-cards' },
-    { path: '/quiz',       label: 'Quiz',       icon: 'ti-help-circle' },
+ navLinks = [
+    { path: '/',            label: 'Home',        icon: 'ti-home' },
+    { path: '/dashboard',   label: 'Dashboard',   icon: 'ti-layout-dashboard' },
+    { path: '/workspace',   label: 'Workspace',   icon: 'ti-file-text' },
+    { path: '/flashcards',  label: 'Flashcards',  icon: 'ti-cards' },
+    { path: '/quiz',        label: 'Quiz',        icon: 'ti-help-circle' },
+    { path: '/study-plan',  label: 'Study Plan',  icon: 'ti-calendar-event' },
   ];
 
   toggleA11y()     { this.showA11y.update(v => !v); this.showUserMenu.set(false); }

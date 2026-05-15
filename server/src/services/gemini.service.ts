@@ -302,3 +302,36 @@ Subject: ${sanitizeForPrompt(subject)}
 Concept: ${sanitizeForPrompt(content)}`;
   return (await generate(prompt)).trim();
 }
+// ─────────────────────────────────────────────────────────────
+// 9. GENERATE STUDY PLAN
+// ─────────────────────────────────────────────────────────────
+export async function generateStudyPlan(
+  chapters: { name: string; subject: string; wordCount: number }[],
+  deadlineDays: number
+): Promise<string> {
+  const chapterList = chapters
+    .map((c, i) => `Chapter ${i + 1}: "${sanitizeForPrompt(c.name)}" (${sanitizeForPrompt(c.subject)}, ~${c.wordCount} words)`)
+    .join('\n');
+
+  const prompt = `You are an expert academic planner. Create a detailed day-by-day study plan.
+
+Student has ${chapters.length} chapter(s) to study and ${deadlineDays} day(s) until their exam/deadline.
+
+Chapters:
+${chapterList}
+
+Create a realistic study plan. For each day, assign specific tasks from:
+- Read summary (15 min per chapter)
+- Review flashcards (20 min per chapter)
+- Take quiz (15 min per chapter)
+- Revision day (review weak areas)
+
+Rules:
+- Spread chapters evenly across the days
+- Include at least 1 full revision day at the end if days allow
+- Keep daily study time under 2 hours
+- Format as plain text with Day 1:, Day 2:, etc.
+- Be specific about which chapter and which activity each day`;
+
+  return (await generate(prompt)).trim();
+}
