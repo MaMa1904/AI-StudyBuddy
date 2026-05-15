@@ -1,7 +1,9 @@
 import { Component, inject, signal, computed, HostListener } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { TitleCasePipe } from '@angular/common';
 import { StudyDataService } from '../../services/study-data.service';
+import { AiService } from '../../services/ai.service';
 import { AuthService } from '../../services/auth.service';
 import { DownloadService } from '../../services/download.service';
 import { AuthModalComponent } from '../../components/auth-modal/auth-modal';
@@ -11,7 +13,7 @@ type FilterType = 'All' | 'Definitions' | 'Formulas' | 'Fill-in' | 'Difficult' |
 
 @Component({
   selector: 'app-flashcards',
-  imports: [RouterLink, TitleCasePipe, AuthModalComponent],
+  imports: [RouterLink, TitleCasePipe, AuthModalComponent, FormsModule],
   templateUrl: './flashcards.html',
   styleUrl: './flashcards.scss'
 })
@@ -19,12 +21,16 @@ export class FlashcardsComponent {
   data     = inject(StudyDataService);
   auth     = inject(AuthService);
   download = inject(DownloadService);
+  ai = inject(AiService);
 
   currentIndex  = signal(0);
   isFlipped     = signal(false);
   activeFilter  = signal<FilterType>('All');
   shuffled      = signal(false);
   showAuthModal = signal(false);
+  targetLanguage = '';
+  isExplaining = signal(false);
+  languageExplanation = signal('');
   sessionDone   = signal(false); // true when user has reviewed all cards in session
 
   // Snapshot of shuffled order — prevents re-randomizing on every signal read
@@ -209,4 +215,13 @@ export class FlashcardsComponent {
     }
     this.shuffledSnapshot.set(arr);
   }
+  explainInLanguage() {
+  const card = this.currentCard();
+  if (!card || !this.targetLanguage.trim()) return;
+  this.isExplaining.set(true);
+  this.languageExplanation.set('');
+  this.ai.explainInLanguage(card.back, this.targetLanguage, card.subject)
+    .then(res => this.languageExplanation.set(res.explanation))
+    .finally(() => this.isExplaining.set(false));
+}
 }

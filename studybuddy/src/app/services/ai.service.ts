@@ -224,4 +224,11 @@ export class AiService {
       if (current >= to) clearInterval(iv);
     }, interval);
   }
+  explainInLanguage(content: string, language: string, subject: string): Promise<{ explanation: string }> {
+  return fetch(`${environment.apiUrl}/explain-in-language`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ content, language, subject }),
+  }).then(r => r.json());
+}
 }

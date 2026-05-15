@@ -287,3 +287,18 @@ Summary: ${sanitizeForPrompt(content)}
 `;
   return (await generate(prompt)).trim();
 }
+// ─────────────────────────────────────────────────────────────
+// 8. EXPLAIN IN DESIRED LANGUAGE
+// ─────────────────────────────────────────────────────────────
+export async function explainInLanguage(
+  content: string,
+  targetLanguage: string,
+  subject: string
+): Promise<string> {
+  const safeLanguage = sanitizeForPrompt(targetLanguage).slice(0, 50);
+  const prompt = `You are an expert academic tutor. Explain the following concept in ${safeLanguage}.
+Write the entire explanation in ${safeLanguage} only. Keep it clear and student-friendly (max 200 words).
+Subject: ${sanitizeForPrompt(subject)}
+Concept: ${sanitizeForPrompt(content)}`;
+  return (await generate(prompt)).trim();
+}
