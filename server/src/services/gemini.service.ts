@@ -233,12 +233,14 @@ Rules:
 export async function generateAll(
   docId: string,
   text: string,
-  subject: string
+  subject: string,
+  flashcardCount = 15,
+  quizCount = 10
 ): Promise<{ summaries: SummarySection[]; flashcards: Flashcard[]; questions: QuizQuestion[] }> {
   const [summaries, flashcards, questions] = await Promise.all([
     generateSummaries(docId, text, subject),
-    generateFlashcards(docId, text, subject, 15),
-    generateQuizQuestions(docId, text, subject, 10),
+    generateFlashcards(docId, text, subject, flashcardCount),
+    generateQuizQuestions(docId, text, subject, quizCount),
   ]);
   return { summaries, flashcards, questions };
 }
