@@ -149,8 +149,39 @@
         <div class="fc-stat-lbl">Easy</div>
       </div>
     </div>
+        <!-- Explain in Desired Language -->
+    <div class="language-explain-panel" style="margin: 20px 0; padding: 20px; background: var(--glass-bg); border: 1px solid var(--border); border-radius: 16px;">
+      <h3 style="margin-bottom: 12px; font-size: 1rem;">
+        <i class="ti ti-language" aria-hidden="true"></i> Explain in Your Language
+      </h3>
+      <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <input
+          type="text"
+          [(ngModel)]="targetLanguage"
+          placeholder="Type a language (e.g. Hindi, Spanish, French...)"
+          style="flex: 1; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border); background: var(--input-bg, var(--bg)); color: var(--text); font-size: 0.9rem; min-width: 200px;"
+          maxlength="50"
+          aria-label="Target language"
+        />
+        <button
+          class="btn-primary"
+          (click)="explainInLanguage()"
+          [disabled]="isExplaining() || !targetLanguage.trim() || !currentCard()"
+          style="white-space: nowrap;"
+        >
+          <i class="ti ti-sparkles" aria-hidden="true"></i>
+          {{ isExplaining() ? 'Translating...' : 'Explain' }}
+        </button>
+      </div>
+      @if (languageExplanation()) {
+        <div style="margin-top: 14px; padding: 14px; background: var(--bg); border-radius: 10px; line-height: 1.6; font-size: 0.95rem;">
+          {{ languageExplanation() }}
+        </div>
+      }
+    </div>
 
     <!-- Actions -->
+
     <div class="fc-actions">
       <button class="btn-secondary" style="flex:1;justify-content:center" (click)="downloadCards()" [disabled]="!filteredCards().length">
         <i class="ti ti-download" aria-hidden="true"></i> Download Offline

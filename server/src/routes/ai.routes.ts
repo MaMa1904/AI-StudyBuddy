@@ -12,6 +12,7 @@ import {
   simplerExplanation,
   expandDetail,
   extractKeywords,
+  explainInLanguage,
 } from '../services/gemini.service';
 
 const router = Router();
@@ -327,5 +328,23 @@ export function cleanupDocStore() {
   }
   docTextStore.clear();
 }
+// ─────────────────────────────────────────────────────────────
+// POST /api/explain-in-language
+// Explain a concept in the student's desired language
+// ─────────────────────────────────────────────────────────────
+router.post('/explain-in-language', async (req: Request, res: Response) => {
+  try {
+    const content = requireString(req.body.content, 'content', 10000);
+    if (!content) return sendError(res, 400, 'content is required.');
+    const language = requireString(req.body.language, 'language', 50);
+    if (!language) return sendError(res, 400, 'language is required.');
+    const subject = requireString(req.body.subject, 'subject', 100) || 'General';
+    const explanation = await explainInLanguage(content, language, subject);
+    return res.json({ explanation });
+  } catch (err: any) {
+    console.error('[explain-in-language]', err);
+    return sendError(res, 500, 'Failed to explain in language.', err.message);
+  }
+});
 
 export default router;
