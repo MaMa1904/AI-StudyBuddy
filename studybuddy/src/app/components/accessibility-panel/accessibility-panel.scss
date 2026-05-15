@@ -108,8 +108,8 @@
   &:hover { background: var(--glass2); color: var(--text); }
 
   &.active {
-    background: rgba(79, 70, 229, 0.2);
-    border-color: rgba(79, 70, 229, 0.5);
+    background: rgba(27, 107, 125, 0.2);
+    border-color: rgba(27, 107, 125, 0.5);
     color: var(--indigo-light);
   }
 }
@@ -118,8 +118,8 @@
   width: 100%;
   padding: 9px;
   border-radius: var(--r8);
-  border: 1px solid rgba(79, 70, 229, 0.3);
-  background: rgba(79, 70, 229, 0.1);
+  border: 1px solid rgba(27, 107, 125, 0.3);
+  background: rgba(27, 107, 125, 0.1);
   color: var(--indigo-light);
   font-size: 12px;
   font-weight: 500;
@@ -131,5 +131,5 @@
   transition: all 0.2s;
   font-family: 'Sora', sans-serif;
 
-  &:hover { background: rgba(79, 70, 229, 0.2); }
+  &:hover { background: rgba(27, 107, 125, 0.2); }
 }

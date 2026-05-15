@@ -45,8 +45,8 @@
   align-items: center;
   justify-content: space-between;
   padding: 12px 16px;
-  background: rgba(79, 70, 229, 0.07);
-  border: 1px solid rgba(79, 70, 229, 0.2);
+  background: rgba(27, 107, 125, 0.07);
+  border: 1px solid rgba(27, 107, 125, 0.2);
   border-radius: var(--r12);
   font-size: 13px;
   color: var(--text2);
@@ -248,9 +248,9 @@
   border-radius: 3px;
   background: var(--glass2);
   transition: background 0.3s;
-  &.l1 { background: rgba(79, 70, 229, 0.25); }
-  &.l2 { background: rgba(79, 70, 229, 0.5); }
-  &.l3 { background: rgba(79, 70, 229, 0.85); }
+  &.l1 { background: rgba(27, 107, 125, 0.25); }
+  &.l2 { background: rgba(27, 107, 125, 0.5); }
+  &.l3 { background: rgba(27, 107, 125, 0.85); }
 }
 
 .heatmap-label { font-size: 11px; color: var(--text3); margin-top: 7px; text-align: center; }
@@ -264,8 +264,8 @@
 /* ── Sign-in Panel ── */
 .signin-panel {
   text-align: center;
-  background: linear-gradient(135deg, rgba(79, 70, 229, 0.1), rgba(124, 58, 237, 0.1));
-  border-color: rgba(79, 70, 229, 0.25);
+  background: linear-gradient(135deg, rgba(27, 107, 125, 0.1), rgba(34, 145, 159, 0.1));
+  border-color: rgba(27, 107, 125, 0.25);
 }
 
 .signin-icon { font-size: 32px; margin-bottom: 8px; }
