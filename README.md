@@ -121,6 +121,7 @@ The root `vercel.json` file automatically configures the builds and routes:
 
 > **Note on Serverless Constraints:** Vercel functions have a read-only filesystem. The backend automatically detects Vercel (`process.env.VERCEL`) and gracefully routes file uploads and cache directories to the ephemeral `/tmp` directory.
 
+
 ---
 
 ## 🔌 API Endpoints (Backend)

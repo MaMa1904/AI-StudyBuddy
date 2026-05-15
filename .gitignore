@@ -36,6 +36,6 @@ npm-debug.log*
 coverage/
 
 # -- Additional --
-Improvement.txt
+Improvement.md
 AGENT_CONTEXT.md
 studysphere_ai_v2.html
