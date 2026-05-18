@@ -27,10 +27,15 @@ export class FlashcardsComponent {
   showAuthModal = signal(false);
   sessionDone   = signal(false); // true when user has reviewed all cards in session
 
-  // Snapshot of shuffled order — prevents re-randomizing on every signal read
-  private shuffledSnapshot = signal<Flashcard[]>([]);
+  // Session-specific review counts (reset each session)
+  sessionHard = signal(0);
+  sessionOk   = signal(0);
+  sessionEasy = signal(0);
 
-  // Real counts from actual card data
+  // Stable shuffled order — stores IDs only so card data stays fresh
+  private shuffledIds = signal<string[]>([]);
+
+  // Real counts from actual card data (reflects user markings via markCardReviewed)
   hardCount = computed(() => this.data.flashcards().filter(c => c.difficulty === 'hard').length);
   okCount   = computed(() => this.data.flashcards().filter(c => c.difficulty === 'medium').length);
   easyCount = computed(() => this.data.flashcards().filter(c => c.difficulty === 'easy').length);
@@ -49,9 +54,12 @@ export class FlashcardsComponent {
       case 'Favorites':   cards = cards.filter(c => c.isFavorite);            break;
     }
 
-    // Use the stable snapshot when shuffled — avoids re-randomizing on every read
+    // When shuffled, reorder using stored IDs but always use fresh card data
     if (this.shuffled()) {
-      return this.shuffledSnapshot();
+      const cardMap = new Map(cards.map(c => [c.id, c]));
+      return this.shuffledIds()
+        .map(id => cardMap.get(id))
+        .filter((c): c is Flashcard => !!c);
     }
     return cards;
   });
@@ -75,9 +83,10 @@ export class FlashcardsComponent {
     this.currentIndex.set(0);
     this.isFlipped.set(false);
     this.sessionDone.set(false);
-    // Re-snapshot if shuffle is active with new filter
+    this.resetSessionCounts();
+    // Re-create shuffled order if shuffle is active with new filter
     if (this.shuffled()) {
-      this.createShuffledSnapshot();
+      this.createShuffledOrder();
     }
   }
 
@@ -103,12 +112,13 @@ export class FlashcardsComponent {
     const newVal = !this.shuffled();
     this.shuffled.set(newVal);
     if (newVal) {
-      this.createShuffledSnapshot();
+      this.createShuffledOrder();
     }
     // Reset to first card when toggling shuffle
     this.currentIndex.set(0);
     this.isFlipped.set(false);
     this.sessionDone.set(false);
+    this.resetSessionCounts();
   }
 
   toggleFavorite() {
@@ -119,6 +129,11 @@ export class FlashcardsComponent {
   markCard(difficulty: 'hard' | 'ok' | 'easy') {
     const card = this.currentCard();
     if (card) this.data.markCardReviewed(card.id, difficulty === 'ok' ? 'medium' : difficulty);
+
+    // Track session-specific marks
+    if (difficulty === 'hard') this.sessionHard.update(n => n + 1);
+    else if (difficulty === 'ok') this.sessionOk.update(n => n + 1);
+    else this.sessionEasy.update(n => n + 1);
 
     if (this.isLastCard()) {
       // Show completion state instead of silently doing nothing
@@ -132,9 +147,10 @@ export class FlashcardsComponent {
     this.currentIndex.set(0);
     this.isFlipped.set(false);
     this.sessionDone.set(false);
+    this.resetSessionCounts();
     // Re-shuffle for a fresh session
     if (this.shuffled()) {
-      this.createShuffledSnapshot();
+      this.createShuffledOrder();
     }
   }
 
@@ -189,7 +205,13 @@ export class FlashcardsComponent {
   }
 
   // ── Helpers ─────────────────────────────────────────────────
-  private createShuffledSnapshot() {
+  private resetSessionCounts() {
+    this.sessionHard.set(0);
+    this.sessionOk.set(0);
+    this.sessionEasy.set(0);
+  }
+
+  private createShuffledOrder() {
     const filter = this.activeFilter();
     let cards = this.data.flashcards();
 
@@ -201,12 +223,12 @@ export class FlashcardsComponent {
       case 'Favorites':   cards = cards.filter(c => c.isFavorite);            break;
     }
 
-    // Fisher-Yates shuffle for uniform randomness
-    const arr = [...cards];
-    for (let i = arr.length - 1; i > 0; i--) {
+    // Fisher-Yates shuffle — store IDs only for stable order with fresh data
+    const ids = cards.map(c => c.id);
+    for (let i = ids.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
-      [arr[i], arr[j]] = [arr[j], arr[i]];
+      [ids[i], ids[j]] = [ids[j], ids[i]];
     }
-    this.shuffledSnapshot.set(arr);
+    this.shuffledIds.set(ids);
   }
 }

@@ -134,7 +134,7 @@ export class StudyDataService {
     const scoreMap = { easy: 1, medium: 0, hard: -1 };
     this.flashcards.update(cards =>
       cards.map(c => c.id === id
-        ? { ...c, spacedRepetitionScore: Math.max(0, c.spacedRepetitionScore + scoreMap[difficulty]), lastReviewed: new Date().toISOString() }
+        ? { ...c, difficulty, spacedRepetitionScore: Math.max(0, c.spacedRepetitionScore + scoreMap[difficulty]), lastReviewed: new Date().toISOString() }
         : c)
     );
     this.stats.update(s => ({ ...s, cardsStudied: s.cardsStudied + 1 }));
