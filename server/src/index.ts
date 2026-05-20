@@ -35,9 +35,9 @@ app.use(helmet({
   crossOriginResourcePolicy: { policy: 'cross-origin' },
 }));
 
-// ── CORS — only allow Angular dev server ─────────────────────
+// ── CORS — allow Angular dev server and Vercel ─────────────────────
 app.use(cors({
-  origin: config.allowedOrigin,
+  origin: config.nodeEnv === 'production' ? '*' : config.allowedOrigin,
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
@@ -54,9 +54,11 @@ const limiter = rateLimit({
   legacyHeaders: false,
   message: { error: 'Too many requests. Please wait a moment before trying again.' },
 });
-app.use('/api', limiter);
 
 // ── Routes ────────────────────────────────────────────────────
+// Vercel passes the full original path (e.g. /api/health) to Express,
+// so we always mount on /api — same as local development.
+app.use('/api', limiter);
 app.use('/api', aiRoutes);
 
 // ── 404 handler ───────────────────────────────────────────────
@@ -75,31 +77,32 @@ app.use((err: any, _req: express.Request, res: express.Response, _next: express.
   });
 });
 
-// ── Start ─────────────────────────────────────────────────────
-const server = app.listen(config.port, () => {
-  console.log('\n🚀 StudyBuddy Server running');
-  console.log(`   ➜  Local:  http://localhost:${config.port}`);
-  console.log(`   ➜  Health: http://localhost:${config.port}/api/health`);
-  console.log(`   ➜  Model:  ${config.gemini.model}`);
-  console.log(`   ➜  CORS:   ${config.allowedOrigin}\n`);
-});
-
-// ── Graceful shutdown ─────────────────────────────────────────
-function shutdown(signal: string) {
-  console.log(`\n⏳ ${signal} received — shutting down gracefully…`);
-  cleanupDocStore();
-  server.close(() => {
-    console.log('✅ Server closed.');
-    process.exit(0);
+// ── Start (Only local development) ────────────────────────────
+if (!config.isVercel) {
+  const server = app.listen(config.port, () => {
+    console.log('\n🚀 StudyBuddy Server running');
+    console.log(`   ➜  Local:  http://localhost:${config.port}`);
+    console.log(`   ➜  Health: http://localhost:${config.port}/api/health`);
+    console.log(`   ➜  Model:  ${config.gemini.model}`);
+    console.log(`   ➜  CORS:   ${config.allowedOrigin}\n`);
   });
-  // Force exit after 5s if connections won't close
-  setTimeout(() => {
-    console.error('⚠️  Forced exit after timeout.');
-    process.exit(1);
-  }, 5000);
-}
 
-process.on('SIGTERM', () => shutdown('SIGTERM'));
-process.on('SIGINT', () => shutdown('SIGINT'));
+  // ── Graceful shutdown ─────────────────────────────────────────
+  function shutdown(signal: string) {
+    console.log(`\n⏳ ${signal} received — shutting down gracefully…`);
+    cleanupDocStore();
+    server.close(() => {
+      console.log('✅ Server closed.');
+      process.exit(0);
+    });
+    setTimeout(() => {
+      console.error('⚠️  Forced exit after timeout.');
+      process.exit(1);
+    }, 5000);
+  }
+
+  process.on('SIGTERM', () => shutdown('SIGTERM'));
+  process.on('SIGINT', () => shutdown('SIGINT'));
+}
 
 export default app;

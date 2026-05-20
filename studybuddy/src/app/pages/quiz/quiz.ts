@@ -38,14 +38,17 @@ export class QuizComponent implements OnDestroy {
   result           = signal<QuizResult | null>(null);
   showAuthModal    = signal(false);
 
+  // Track actual start time for accurate elapsed time (works even when timer is disabled)
+  private quizStartTime = 0;
+
   // Stable snapshot of questions for the active quiz — prevents re-shuffle on every read
   private activeQuestions = signal<QuizQuestion[]>([]);
 
   difficulties: Difficulty[] = ['All', 'Easy', 'Medium', 'Hard'];
   questionTypes = [
-    { label: 'Multiple Choice', checked: true },
-    { label: 'True / False',    checked: true },
-    { label: 'Short Answer',    checked: false },
+    { label: 'Multiple Choice', value: 'mcq',          checked: true },
+    { label: 'True / False',    value: 'true-false',    checked: true },
+    { label: 'Short Answer',    value: 'short-answer',  checked: false },
   ];
 
   // Collect all quiz questions from all documents
@@ -62,6 +65,15 @@ export class QuizComponent implements OnDestroy {
     const d = this.activeDifficulty();
     let pool = this.allQuestions();
     if (!pool.length) return [];
+
+    // Filter by question type — only include checked types
+    const checkedTypes = this.questionTypes
+      .filter(t => t.checked)
+      .map(t => t.value);
+    if (checkedTypes.length > 0 && checkedTypes.length < this.questionTypes.length) {
+      const filtered = pool.filter(q => checkedTypes.includes(q.type));
+      pool = filtered.length > 0 ? filtered : pool; // fall back to all if none match
+    }
 
     // Filter by difficulty
     if (d !== 'All') {
@@ -114,6 +126,7 @@ export class QuizComponent implements OnDestroy {
 
     this.activeQuestions.set(qs);
     this.quizFinished = false;
+    this.quizStartTime = Date.now();
     this.state.set('active');
     this.currentIndex.set(0);
     this.selectedAnswer.set(null);
@@ -190,7 +203,8 @@ export class QuizComponent implements OnDestroy {
     });
 
     const score = Math.round((correct / qs.length) * 100);
-    const timeTaken = 300 - this.timeLeft();
+    // Use real elapsed time — works correctly even when timer is disabled
+    const timeTaken = Math.round((Date.now() - this.quizStartTime) / 1000);
     this.result.set({ totalQuestions: qs.length, correct, wrong, skipped, timeTaken, score });
 
     const attempt: QuizAttempt = {

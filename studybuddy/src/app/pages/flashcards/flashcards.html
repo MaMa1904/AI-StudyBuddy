@@ -64,9 +64,9 @@
         <h2>Session Complete!</h2>
         <p>You've reviewed all {{ filteredCards().length }} cards in this set.</p>
         <div class="session-complete-stats">
-          <div class="sc-stat"><span style="color:var(--green)">{{ easyCount() }}</span><small>Easy</small></div>
-          <div class="sc-stat"><span style="color:var(--yellow)">{{ okCount() }}</span><small>Medium</small></div>
-          <div class="sc-stat"><span style="color:var(--red)">{{ hardCount() }}</span><small>Hard</small></div>
+          <div class="sc-stat"><span style="color:var(--green)">{{ sessionEasy() }}</span><small>Easy</small></div>
+          <div class="sc-stat"><span style="color:var(--yellow)">{{ sessionOk() }}</span><small>OK</small></div>
+          <div class="sc-stat"><span style="color:var(--red)">{{ sessionHard() }}</span><small>Hard</small></div>
         </div>
         <div class="session-complete-actions">
           <button class="btn-primary" (click)="restartSession()">

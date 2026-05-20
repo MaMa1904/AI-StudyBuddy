@@ -1,0 +1,30 @@
+{
+    "version": 2,
+    "builds": [
+        {
+            "src": "studybuddy/package.json",
+            "use": "@vercel/static-build",
+            "config": {
+                "distDir": "dist/studybuddy/browser"
+            }
+        },
+        {
+            "src": "server/src/index.ts",
+            "use": "@vercel/node"
+        }
+    ],
+    "routes": [
+        {
+            "src": "/api/(.*)",
+            "dest": "server/src/index.ts"
+        },
+        {
+            "src": "/(.*\\.[a-zA-Z0-9]+)$",
+            "dest": "studybuddy/$1"
+        },
+        {
+            "src": "/(.*)",
+            "dest": "studybuddy/index.html"
+        }
+    ]
+}

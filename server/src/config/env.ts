@@ -3,9 +3,18 @@
  * dotenv is loaded BEFORE this module via src/register.ts (ts-node --require).
  */
 
+const isVercel = !!process.env.VERCEL;
+const isProd = process.env.NODE_ENV === 'production' || isVercel;
+
 function required(key: string): string {
   const val = process.env[key];
   if (!val || val.trim() === '' || val === `your_${key.toLowerCase()}_here`) {
+    // On Vercel, don't crash at module load — log a warning instead
+    // The function will fail at request time with a clear error
+    if (isVercel) {
+      console.error(`[env] Missing environment variable: ${key} — set it in Vercel Dashboard > Settings > Environment Variables`);
+      return '';
+    }
     throw new Error(
       `\n❌  Missing environment variable: ${key}\n` +
       `   → Open server/.env and set ${key}\n` +
@@ -21,7 +30,8 @@ function optional(key: string, fallback: string): string {
 
 export const config = {
   port:          parseInt(optional('PORT', '3000'), 10),
-  nodeEnv:       optional('NODE_ENV', 'development'),
+  nodeEnv:       isProd ? 'production' : optional('NODE_ENV', 'development'),
+  isVercel,
   allowedOrigin: optional('ALLOWED_ORIGIN', 'http://localhost:4200'),
 
   gemini: {
@@ -36,6 +46,6 @@ export const config = {
 
   upload: {
     maxFileSizeBytes: parseInt(optional('MAX_FILE_SIZE_BYTES', String(20 * 1024 * 1024)), 10),
-    dir: optional('UPLOAD_DIR', './uploads'),
+    dir: isProd ? '/tmp/uploads' : optional('UPLOAD_DIR', './uploads'),
   },
 } as const;

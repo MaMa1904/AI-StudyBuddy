@@ -109,10 +109,12 @@
   @if (state() === 'active') {
     <div class="quiz-active animate-fade-in">
       <div class="quiz-header">
+        @if (enableTimer()) {
         <div class="quiz-timer" [class.urgent]="timeLeft() < 60" role="timer" aria-live="polite" [attr.aria-label]="'Time remaining: ' + timerDisplay()">
           <i class="ti ti-clock" aria-hidden="true"></i>
           {{ timerDisplay() }}
         </div>
+      }
         <div class="quiz-prog" role="progressbar" [attr.aria-valuenow]="progress()" aria-valuemin="0" aria-valuemax="100">
           <div class="quiz-prog-bar">
             <div class="quiz-prog-fill" [style.width.%]="progress()"></div>
@@ -130,7 +132,7 @@
           <div class="q-text">{{ q.text }}</div>
 
           <div class="options" role="radiogroup" [attr.aria-label]="'Answer options'">
-            @for (option of q.options; track $index) {
+            @for (option of (q.options ?? []); track $index) {
               <button
                 class="option"
                 [class]="optionClass(q, $index)"

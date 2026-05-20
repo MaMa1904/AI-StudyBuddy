@@ -34,3 +34,11 @@ npm-debug.log*
 # ── Misc ──
 *.tgz
 coverage/
+
+# -- Additional --
+Improvement.md
+AGENT_CONTEXT.md
+studysphere_ai_v2.html
+AI-StudyBuddy.png
+AI-StudyBuddy_Dark.png
+AI-StudyBuddy_Light.png

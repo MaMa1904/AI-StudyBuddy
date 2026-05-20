@@ -32,8 +32,8 @@
 
 /* ── Header card ── */
 .profile-header-card {
-  background: linear-gradient(135deg, rgba(79,70,229,0.12), rgba(124,58,237,0.12));
-  border: 1px solid rgba(79,70,229,0.25);
+  background: linear-gradient(135deg, rgba(27,107,125,0.12), rgba(34,145,159,0.12));
+  border: 1px solid rgba(27,107,125,0.25);
   border-radius: var(--r24);
   padding: 28px;
   display: flex;
@@ -54,7 +54,7 @@
   font-weight: 700;
   color: #fff;
   flex-shrink: 0;
-  box-shadow: 0 8px 24px rgba(79,70,229,0.4);
+  box-shadow: 0 8px 24px rgba(27,107,125,0.4);
 }
 
 .profile-info {
@@ -105,7 +105,7 @@
   width: 100%;
   max-width: 320px;
 
-  &:focus { outline: none; border-color: rgba(79,70,229,0.6); }
+  &:focus { outline: none; border-color: rgba(27,107,125,0.6); }
 }
 
 .edit-actions { display: flex; gap: 8px; }
@@ -197,7 +197,7 @@
   width: 34px;
   height: 34px;
   border-radius: var(--r8);
-  background: rgba(79,70,229,0.12);
+  background: rgba(27,107,125,0.12);
   color: var(--indigo-light);
   display: flex;
   align-items: center;

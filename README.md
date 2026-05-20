@@ -96,6 +96,34 @@ The application will run at **http://localhost:4200**
 
 ---
 
+## ☁️ Deploying to Vercel
+
+StudyBuddy is fully configured to be deployed as a monorepo on [Vercel](https://vercel.com). The Angular frontend is deployed as a static site, and the Express backend is deployed as Serverless Functions.
+
+### 1. Prerequisites
+- A Vercel account linked to your GitHub.
+- Push your repository to GitHub.
+
+### 2. Vercel Configuration
+The root `vercel.json` file automatically configures the builds and routes:
+- `@vercel/static-build` compiles the Angular frontend.
+- `@vercel/node` handles the Express backend.
+
+### 3. Deployment Steps
+1. Log into Vercel and click **Add New...** -> **Project**.
+2. Import your GitHub repository.
+3. Keep the **Root Directory** as `./` (do not select `studybuddy` or `server`).
+4. You will see a warning about \`builds\` overriding project settings — this is expected.
+5. Under **Environment Variables**, add:
+   - `GEMINI_API_KEY`: Your Gemini API key.
+   - `NODE_ENV`: `production`
+6. Click **Deploy**.
+
+> **Note on Serverless Constraints:** Vercel functions have a read-only filesystem. The backend automatically detects Vercel (`process.env.VERCEL`) and gracefully routes file uploads and cache directories to the ephemeral `/tmp` directory.
+
+
+---
+
 ## 🔌 API Endpoints (Backend)
 
 The Express backend provides the following core endpoints (`http://localhost:3000/api`):

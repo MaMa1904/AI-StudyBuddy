@@ -23,18 +23,26 @@ interface DocEntry {
   text: string;
   subject: string;
   name: string;
+  pages: number;
+  wordCount: number;
   timer: ReturnType<typeof setTimeout>;
 }
 const docTextStore = new Map<string, DocEntry>();
 
 // ── Disk cache directory for surviving restarts ───────────────
-const cacheDir = path.resolve(config.upload.dir, '..', 'doc_cache');
-if (!fs.existsSync(cacheDir)) fs.mkdirSync(cacheDir, { recursive: true });
+const cacheDir = config.isVercel
+  ? '/tmp/doc_cache'
+  : path.resolve(config.upload.dir, '..', 'doc_cache');
+try {
+  if (!fs.existsSync(cacheDir)) fs.mkdirSync(cacheDir, { recursive: true });
+} catch (err) {
+  console.warn('[cache] Could not create cache dir (read-only fs?):', err);
+}
 
 function cacheToDisK(docId: string, entry: Omit<DocEntry, 'timer'>) {
   try {
     const filePath = path.join(cacheDir, `${docId}.json`);
-    fs.writeFileSync(filePath, JSON.stringify({ text: entry.text, subject: entry.subject, name: entry.name }));
+    fs.writeFileSync(filePath, JSON.stringify({ text: entry.text, subject: entry.subject, name: entry.name, pages: entry.pages, wordCount: entry.wordCount }));
   } catch (err) {
     console.warn('[cache] Failed to write disk cache:', err);
   }
@@ -45,14 +53,14 @@ function loadFromDisk(docId: string): Omit<DocEntry, 'timer'> | null {
     const filePath = path.join(cacheDir, `${docId}.json`);
     if (!fs.existsSync(filePath)) return null;
     const data = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
-    return { text: data.text, subject: data.subject, name: data.name };
+    return { text: data.text, subject: data.subject, name: data.name, pages: data.pages ?? 0, wordCount: data.wordCount ?? 0 };
   } catch {
     return null;
   }
 }
 
 // ── Store helper with timer lifecycle management ─────────────
-function storeDoc(docId: string, text: string, subject: string, name: string) {
+function storeDoc(docId: string, text: string, subject: string, name: string, pages = 0, wordCount = 0) {
   // Cancel any existing timer for this docId (prevents memory leak)
   const existing = docTextStore.get(docId);
   if (existing?.timer) clearTimeout(existing.timer);
@@ -64,16 +72,16 @@ function storeDoc(docId: string, text: string, subject: string, name: string) {
     try { fs.unlinkSync(path.join(cacheDir, `${docId}.json`)); } catch { /* ok */ }
   }, 2 * 60 * 60 * 1000);
 
-  docTextStore.set(docId, { text, subject, name, timer });
+  docTextStore.set(docId, { text, subject, name, pages, wordCount, timer });
 
   // Also write to disk for restart resilience
-  cacheToDisK(docId, { text, subject, name });
+  cacheToDisK(docId, { text, subject, name, pages, wordCount });
 }
 
 // ── Retrieve document — check memory first, then disk ────────
 function getDoc(docId: string): Omit<DocEntry, 'timer'> | null {
   const mem = docTextStore.get(docId);
-  if (mem) return { text: mem.text, subject: mem.subject, name: mem.name };
+  if (mem) return { text: mem.text, subject: mem.subject, name: mem.name, pages: mem.pages, wordCount: mem.wordCount };
 
   // Try disk cache (server may have restarted)
   const disk = loadFromDisk(docId);
@@ -87,7 +95,11 @@ function getDoc(docId: string): Omit<DocEntry, 'timer'> | null {
 
 // ── Multer config ─────────────────────────────────────────────
 const uploadDir = path.resolve(config.upload.dir);
-if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+try {
+  if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+} catch (err) {
+  console.warn('[upload] Could not create upload dir (read-only fs?):', err);
+}
 
 const storage = multer.memoryStorage(); // keep in memory, don't write to disk
 const upload = multer({
@@ -135,7 +147,7 @@ router.post('/process-pdf', upload.single('pdf'), async (req: Request, res: Resp
     }
 
     // Store text for subsequent AI calls (with timer + disk cache)
-    storeDoc(docId, result.text, result.subject, req.file.originalname);
+    storeDoc(docId, result.text, result.subject, req.file.originalname, result.pages, result.wordCount);
 
     return res.json({
       docId,
@@ -232,7 +244,15 @@ router.post('/generate-all', async (req: Request, res: Response) => {
     const stored = getDoc(docId);
     if (!stored) return sendError(res, 404, 'Document not found. Please re-upload the PDF.');
 
-    const result = await generateAll(docId, stored.text, stored.subject);
+    // Scale flashcard/quiz counts based on document size
+    const pages = stored.pages || 1;
+    const words = stored.wordCount || stored.text.split(/\s+/).length;
+    // ~5 flashcards per page, clamped 10–50; ~3 quiz questions per page, clamped 5–30
+    const flashcardCount = Math.min(50, Math.max(10, Math.round(pages * 5)));
+    const quizCount = Math.min(30, Math.max(5, Math.round(pages * 3)));
+    console.log(`[generate-all] docId=${docId} pages=${pages} words=${words} → flashcards=${flashcardCount}, quiz=${quizCount}`);
+
+    const result = await generateAll(docId, stored.text, stored.subject, flashcardCount, quizCount);
 
     // Also extract keywords so the frontend gets them in one call
     let keywords: string[] = [];
@@ -246,6 +266,7 @@ router.post('/generate-all', async (req: Request, res: Response) => {
       docId,
       subject: stored.subject,
       name: stored.name,
+      pages,
       keywords,
       ...result,
     });

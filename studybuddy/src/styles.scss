@@ -6,20 +6,28 @@
 
 /* ── CSS Variables ── */
 :root {
-  --indigo: #4F46E5;
-  --indigo-light: #818CF8;
-  --purple: #7C3AED;
-  --purple-light: #A78BFA;
-  --blue: #2563EB;
-  --blue-light: #60A5FA;
-  --pink: #EC4899;
+  --teal: #1B6B7D;
+  --teal-light: #5BB8C9;
+  --teal-dark: #134E5C;
+  --teal-sec: #22919F;
+  --teal-sec-light: #7DD4E0;
+  --cyan: #147A8C;
+  --cyan-light: #4AADB8;
   --green: #10B981;
   --yellow: #FBBF24;
   --red: #EF4444;
 
-  --bg: #0A0B1E;
-  --bg2: #0F1030;
-  --bg3: #13153A;
+  /* Legacy aliases for components using old names */
+  --indigo: var(--teal);
+  --indigo-light: var(--teal-light);
+  --purple: var(--teal-sec);
+  --purple-light: var(--teal-sec-light);
+  --blue: var(--cyan);
+  --blue-light: var(--cyan-light);
+
+  --bg: #0B1A1E;
+  --bg2: #0E2229;
+  --bg3: #122C33;
 
   --glass: rgba(255, 255, 255, 0.05);
   --glass2: rgba(255, 255, 255, 0.08);
@@ -28,35 +36,35 @@
   --border: rgba(255, 255, 255, 0.10);
   --border2: rgba(255, 255, 255, 0.18);
 
-  --text: #F0F0FF;
-  --text2: #A8A8D0;
-  --text3: #6B6B9A;
+  --text: #E8F4F8;
+  --text2: #9BBEC8;
+  --text3: #5E8A96;
 
   --r8: 8px;
   --r12: 12px;
   --r16: 16px;
   --r24: 24px;
 
-  --grad: linear-gradient(135deg, #4F46E5, #7C3AED);
-  --grad2: linear-gradient(135deg, #2563EB, #4F46E5);
-  --grad3: linear-gradient(135deg, #7C3AED, #EC4899);
-  --glow: 0 0 30px rgba(79, 70, 229, 0.25);
+  --grad: linear-gradient(135deg, #1B6B7D, #22919F);
+  --grad2: linear-gradient(135deg, #147A8C, #1B6B7D);
+  --grad3: linear-gradient(135deg, #22919F, #2DB5A0);
+  --glow: 0 0 30px rgba(27, 107, 125, 0.25);
   --shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
 }
 
 /* Light mode */
 body.light-mode {
-  --bg: #F4F5FF;
-  --bg2: #ECEEFF;
-  --bg3: #E4E6FF;
+  --bg: #F0F7F9;
+  --bg2: #E4EFF2;
+  --bg3: #D8E8EC;
   --glass: rgba(255, 255, 255, 0.7);
   --glass2: rgba(255, 255, 255, 0.85);
   --glass3: rgba(255, 255, 255, 0.95);
-  --border: rgba(79, 70, 229, 0.12);
-  --border2: rgba(79, 70, 229, 0.22);
-  --text: #1A1A3E;
-  --text2: #4A4A7A;
-  --text3: #8888AA;
+  --border: rgba(27, 107, 125, 0.12);
+  --border2: rgba(27, 107, 125, 0.22);
+  --text: #0E2229;
+  --text2: #3A6A74;
+  --text3: #7A9EA8;
 }
 
 /* Dyslexia mode */
@@ -71,8 +79,8 @@ body.dyslexia-mode {
 body.high-contrast {
   --border: rgba(255, 255, 255, 0.4);
   --border2: rgba(255, 255, 255, 0.6);
-  --text2: #D0D0F0;
-  --text3: #A0A0C0;
+  --text2: #C0DEE5;
+  --text3: #8ABCC7;
 }
 
 /* Reduced motion */
@@ -108,8 +116,8 @@ body {
 /* ── Scrollbar ── */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: var(--bg2); }
-::-webkit-scrollbar-thumb { background: rgba(79, 70, 229, 0.4); border-radius: 99px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(79, 70, 229, 0.7); }
+::-webkit-scrollbar-thumb { background: rgba(27, 107, 125, 0.4); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(27, 107, 125, 0.7); }
 
 /* ── Typography ── */
 h1, h2, h3, h4, h5, h6 { font-weight: 700; line-height: 1.2; }
@@ -145,21 +153,21 @@ h1, h2, h3, h4, h5, h6 { font-weight: 700; line-height: 1.2; }
 .orb1 {
   width: 500px;
   height: 500px;
-  background: radial-gradient(circle, #4F46E5, transparent);
+  background: radial-gradient(circle, #1B6B7D, transparent);
   top: -150px;
   left: -100px;
 }
 .orb2 {
   width: 400px;
   height: 400px;
-  background: radial-gradient(circle, #7C3AED, transparent);
+  background: radial-gradient(circle, #22919F, transparent);
   bottom: -80px;
   right: -80px;
 }
 .orb3 {
   width: 300px;
   height: 300px;
-  background: radial-gradient(circle, #2563EB, transparent);
+  background: radial-gradient(circle, #147A8C, transparent);
   top: 50%;
   right: 20%;
   opacity: 0.12;
@@ -185,7 +193,7 @@ h1, h2, h3, h4, h5, h6 { font-weight: 700; line-height: 1.2; }
   &:hover {
     opacity: 0.9;
     transform: translateY(-1px);
-    box-shadow: 0 8px 24px rgba(79, 70, 229, 0.35);
+    box-shadow: 0 8px 24px rgba(27, 107, 125, 0.35);
   }
 
   &:active { transform: translateY(0); }
@@ -232,7 +240,7 @@ h1, h2, h3, h4, h5, h6 { font-weight: 700; line-height: 1.2; }
   transition: all 0.2s;
 
   &:hover { background: var(--glass2); color: var(--text); }
-  &.active { background: rgba(79, 70, 229, 0.2); color: var(--indigo-light); border-color: rgba(79, 70, 229, 0.4); }
+  &.active { background: rgba(27, 107, 125, 0.2); color: var(--teal-light); border-color: rgba(27, 107, 125, 0.4); }
 }
 
 /* ── Cards ── */
@@ -275,11 +283,11 @@ h1, h2, h3, h4, h5, h6 { font-weight: 700; line-height: 1.2; }
   font-weight: 500;
 }
 
-.badge-indigo { background: rgba(79, 70, 229, 0.15); color: var(--indigo-light); border: 1px solid rgba(79, 70, 229, 0.3); }
+.badge-indigo { background: rgba(27, 107, 125, 0.15); color: var(--teal-light); border: 1px solid rgba(27, 107, 125, 0.3); }
 .badge-green  { background: rgba(16, 185, 129, 0.15); color: #10B981; border: 1px solid rgba(16, 185, 129, 0.3); }
 .badge-yellow { background: rgba(251, 191, 36, 0.15); color: #FBBF24; border: 1px solid rgba(251, 191, 36, 0.3); }
 .badge-red    { background: rgba(239, 68, 68, 0.15); color: #EF4444; border: 1px solid rgba(239, 68, 68, 0.3); }
-.badge-purple { background: rgba(124, 58, 237, 0.15); color: var(--purple-light); border: 1px solid rgba(124, 58, 237, 0.3); }
+.badge-purple { background: rgba(34, 145, 159, 0.15); color: var(--teal-sec-light); border: 1px solid rgba(34, 145, 159, 0.3); }
 
 /* ── Keyword Tag ── */
 .keyword-tag {
@@ -295,9 +303,9 @@ h1, h2, h3, h4, h5, h6 { font-weight: 700; line-height: 1.2; }
   transition: all 0.2s;
 
   &:hover {
-    background: rgba(79, 70, 229, 0.15);
-    color: var(--indigo-light);
-    border-color: rgba(79, 70, 229, 0.4);
+    background: rgba(27, 107, 125, 0.15);
+    color: var(--teal-light);
+    border-color: rgba(27, 107, 125, 0.4);
   }
 }
 
