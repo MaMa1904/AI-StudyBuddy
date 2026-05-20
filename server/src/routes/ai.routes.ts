@@ -13,6 +13,7 @@ import {
   expandDetail,
   extractKeywords,
   explainInLanguage,
+  generateStudyPlan,
 } from '../services/gemini.service';
 
 const router = Router();
@@ -344,6 +345,23 @@ router.post('/explain-in-language', async (req: Request, res: Response) => {
   } catch (err: any) {
     console.error('[explain-in-language]', err);
     return sendError(res, 500, 'Failed to explain in language.', err.message);
+  }
+});
+// ─────────────────────────────────────────────────────────────
+// POST /api/generate-study-plan
+// Generate a day-by-day study plan for multiple chapters
+// ─────────────────────────────────────────────────────────────
+router.post('/generate-study-plan', async (req: Request, res: Response) => {
+  try {
+    const { chapters, deadlineDays } = req.body;
+    if (!Array.isArray(chapters) || chapters.length === 0)
+      return sendError(res, 400, 'chapters array is required.');
+    const days = Math.min(Math.max(Number(deadlineDays) || 7, 1), 365);
+    const plan = await generateStudyPlan(chapters, days);
+    return res.json({ plan });
+  } catch (err: any) {
+    console.error('[generate-study-plan]', err);
+    return sendError(res, 500, 'Failed to generate study plan.', err.message);
   }
 });
 
