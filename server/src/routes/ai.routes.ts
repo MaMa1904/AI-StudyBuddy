@@ -13,6 +13,7 @@ import {
   expandDetail,
   extractKeywords,
   explainInLanguage,
+  generateStudyPlan,
 } from '../services/gemini.service';
 
 const router = Router();
@@ -365,6 +366,43 @@ router.post('/explain-in-language', async (req: Request, res: Response) => {
   } catch (err: any) {
     console.error('[explain-in-language]', err);
     return sendError(res, 500, 'Failed to explain in language.', err.message);
+  }
+});
+// ─────────────────────────────────────────────────────────────
+// POST /api/generate-study-plan
+// Generate a day-by-day study plan for multiple chapters
+// ─────────────────────────────────────────────────────────────
+router.post('/generate-study-plan', async (req: Request, res: Response) => {
+  try {
+    const { chapters, deadlineDays } = req.body;
+    if (!Array.isArray(chapters) || chapters.length === 0)
+      return sendError(res, 400, 'chapters array is required.');
+    const days = Math.min(Math.max(Number(deadlineDays) || 7, 1), 365);
+    const plan = await generateStudyPlan(chapters, days);
+    return res.json({ plan });
+  } catch (err: any) {
+    console.error('[generate-study-plan]', err);
+    return sendError(res, 500, 'Failed to generate study plan.', err.message);
+  }
+});
+// ─────────────────────────────────────────────────────────────
+// POST /api/ask-about-selection
+// Ask AI about a highlighted piece of text
+// ─────────────────────────────────────────────────────────────
+router.post('/ask-about-selection', async (req: Request, res: Response) => {
+  try {
+    const selectedText = requireString(req.body.selectedText, 'selectedText', 5000);
+    if (!selectedText) return sendError(res, 400, 'selectedText is required.');
+    const question = requireString(req.body.question, 'question', 500) || 'Explain this in detail.';
+    const subject = requireString(req.body.subject, 'subject', 100) || 'General';
+    const answer = await simplerExplanation(
+      `Question: ${question}\n\nContext: ${selectedText}`,
+      subject
+    );
+    return res.json({ answer });
+  } catch (err: any) {
+    console.error('[ask-about-selection]', err);
+    return sendError(res, 500, 'Failed to answer question.', err.message);
   }
 });
 

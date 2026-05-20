@@ -231,21 +231,4 @@ export class AiService {
     body: JSON.stringify({ content, language, subject }),
   }).then(r => r.json());
 }
-generateStudyPlan(
-  chapters: { name: string; subject: string; wordCount: number }[],
-  deadlineDays: number
-): Promise<{ plan: string }> {
-  return fetch(`${environment.apiUrl}/generate-study-plan`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ chapters, deadlineDays }),
-  }).then(r => r.json());
-}
-askAboutSelection(selectedText: string, question: string, subject: string): Promise<{ answer: string }> {
-  return fetch(`${environment.apiUrl}/ask-about-selection`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ selectedText, question, subject }),
-  }).then(r => r.json());
-}
 }

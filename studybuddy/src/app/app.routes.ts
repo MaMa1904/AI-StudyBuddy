@@ -22,6 +22,11 @@ export const routes: Routes = [
     title: 'Flashcards — StudyBuddy'
   },
   {
+  path: 'study-plan',
+  loadComponent: () => import('./pages/study-plan/study-plan').then(m => m.StudyPlanComponent),
+  title: 'Study Plan — StudyBuddy'
+},
+  {
     path: 'quiz',
     loadComponent: () => import('./pages/quiz/quiz').then(m => m.QuizComponent),
     title: 'Quiz — StudyBuddy'

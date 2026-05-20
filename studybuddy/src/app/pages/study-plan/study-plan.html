@@ -1,0 +1,85 @@
+<div class="study-plan-page" role="main">
+
+  <!-- Header -->
+  <div class="sp-header">
+    <h1><i class="ti ti-calendar-event" aria-hidden="true"></i> Study Planner</h1>
+    <p>Select your documents, set a deadline, and get a personalized study plan.</p>
+  </div>
+
+  <!-- Document Selection -->
+  <div class="sp-section glass-card">
+    <h2>Step 1 — Select Documents</h2>
+    @if (data.documents().length === 0) {
+      <div class="sp-empty">
+        <p>No documents yet. <a routerLink="/workspace">Upload a PDF</a> first.</p>
+      </div>
+    } @else {
+      <div class="sp-doc-list">
+        @for (doc of data.documents(); track doc.id) {
+          <div
+            class="sp-doc-item"
+            [class.selected]="isSelected(doc.id)"
+            (click)="toggleDoc(doc.id)"
+            role="checkbox"
+            [attr.aria-checked]="isSelected(doc.id)"
+            tabindex="0"
+            (keydown.enter)="toggleDoc(doc.id)"
+          >
+            <i class="ti" [class.ti-checkbox]="isSelected(doc.id)" [class.ti-square]="!isSelected(doc.id)" aria-hidden="true"></i>
+            <div class="sp-doc-info">
+              <span class="sp-doc-name">{{ doc.name }}</span>
+              <span class="sp-doc-subject">{{ doc.subject ?? 'General' }}</span>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  <!-- Deadline Input -->
+  <div class="sp-section glass-card">
+    <h2>Step 2 — Set Your Deadline</h2>
+    <div class="sp-deadline-row">
+      <label for="deadlineDays">I need to finish in</label>
+      <input
+        id="deadlineDays"
+        type="number"
+        [(ngModel)]="deadlineDays"
+        min="1"
+        max="365"
+        style="width: 80px; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 1rem; text-align: center;"
+      />
+      <label for="deadlineDays">days</label>
+    </div>
+  </div>
+
+  <!-- Generate Button -->
+  <button
+    class="btn-primary sp-generate-btn"
+    (click)="generatePlan()"
+    [disabled]="isGenerating() || selectedDocIds().length === 0"
+  >
+    <i class="ti ti-sparkles" aria-hidden="true"></i>
+    {{ isGenerating() ? 'Generating your plan...' : 'Generate Study Plan' }}
+  </button>
+
+  <!-- Error -->
+  @if (errorMsg()) {
+    <div class="sp-error">
+      <i class="ti ti-alert-circle" aria-hidden="true"></i> {{ errorMsg() }}
+    </div>
+  }
+
+  <!-- Study Plan Output -->
+  @if (studyPlan()) {
+    <div class="sp-result glass-card">
+      <h2><i class="ti ti-list-check" aria-hidden="true"></i> Your Study Plan</h2>
+      <div class="sp-plan-content">
+        @for (line of planLines(); track $index) {
+          <p [class.sp-day-heading]="line.startsWith('Day')">{{ line }}</p>
+        }
+      </div>
+    </div>
+  }
+
+</div>
