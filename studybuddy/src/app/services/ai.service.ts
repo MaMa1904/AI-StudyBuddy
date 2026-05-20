@@ -241,4 +241,11 @@ generateStudyPlan(
     body: JSON.stringify({ chapters, deadlineDays }),
   }).then(r => r.json());
 }
+askAboutSelection(selectedText: string, question: string, subject: string): Promise<{ answer: string }> {
+  return fetch(`${environment.apiUrl}/ask-about-selection`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ selectedText, question, subject }),
+  }).then(r => r.json());
+}
 }

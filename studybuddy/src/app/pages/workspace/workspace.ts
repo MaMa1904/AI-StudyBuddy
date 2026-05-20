@@ -4,11 +4,12 @@ import { StudyDataService } from '../../services/study-data.service';
 import { AuthService } from '../../services/auth.service';
 import { AiService } from '../../services/ai.service';
 import { AuthModalComponent } from '../../components/auth-modal/auth-modal';
+import { HighlightAskComponent } from '../../components/highlight-ask/highlight-ask';
 import { UploadedDocument, SummarySection } from '../../models/study.models';
 
 @Component({
   selector: 'app-workspace',
-  imports: [RouterLink, AuthModalComponent],
+  imports: [RouterLink, AuthModalComponent, HighlightAskComponent],
   templateUrl: './workspace.html',
   styleUrl: './workspace.scss'
 })
